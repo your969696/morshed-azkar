@@ -1,0 +1,166 @@
+name: Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run ESLint
+      run: npm run lint
+
+  build:
+    name: Build Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build
+      run: npm run build
+
+    - name: Check dist folder
+      run: |
+        if [ ! -d "dist" ]; then
+          echo "dist folder not found"
+          exit 1
+        fi
+        echo "Build successful"
+
+  electron-build-test:
+    name: Electron Build Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build Vite
+      run: npm run build
+
+    - name: Build Electron (dir only)
+      run: npx electron-builder --dir
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Check build output
+      run: |
+        if [ ! -d "release" ]; then
+          echo "release folder not found"
+          exit 1
+        fi
+        echo "Electron build successful"
+
+  dependency-check:
+    name: Dependency Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Check for vulnerabilities
+      run: npm audit --audit-level=high
+      continue-on-error: true
+
+    - name: Check outdated dependencies
+      run: npm outdated
+      continue-on-error: true
+
+  file-check:
+    name: File Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Check required files
+      run: |
+        echo "Checking required files..."
+        
+        files=(
+          "package.json"
+          "vite.config.js"
+          "tailwind.config.js"
+          "index.html"
+          "electron/main.cjs"
+          "src/main.jsx"
+          "src/App.jsx"
+          "LICENSE"
+          "README.md"
+        )
+        
+        for file in "${files[@]}"; do
+          if [ ! -f "$file" ]; then
+            echo "ERROR: $file not found"
+            exit 1
+          fi
+          echo "OK: $file"
+        done
+        
+        echo "All required files present"
+
+    - name: Check package.json
+      run: |
+        echo "Validating package.json..."
+        
+        if ! node -e "require('./package.json')"; then
+          echo "ERROR: package.json is invalid"
+          exit 1
+        fi
+        
+        echo "package.json is valid"

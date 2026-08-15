@@ -1,0 +1,223 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g., v1.0.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Lint
+      run: npm run lint
+
+    - name: Build
+      run: npm run build
+
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+    needs: test
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build Vite
+      run: npm run build
+
+    - name: Build Electron (x64)
+      run: npx electron-builder --win --x64
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build Electron (ia32)
+      run: npx electron-builder --win --ia32
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload Windows artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: windows-builds
+        path: release/*.exe
+
+  build-macos:
+    name: Build macOS
+    runs-on: macos-latest
+    needs: test
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build Vite
+      run: npm run build
+
+    - name: Build Electron (x64)
+      run: npx electron-builder --mac --x64
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build Electron (arm64)
+      run: npx electron-builder --mac --arm64
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload macOS artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: macos-builds
+        path: release/*.dmg
+
+  build-linux:
+    name: Build Linux
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build Vite
+      run: npm run build
+
+    - name: Build Electron (AppImage)
+      run: npx electron-builder --linux AppImage
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build Electron (deb)
+      run: npx electron-builder --linux deb
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload Linux artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: linux-builds
+        path: |
+          release/*.AppImage
+          release/*.deb
+
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [build-windows, build-macos, build-linux]
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts/
+
+    - name: Get version
+      id: version
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo "version=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+        else
+          echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Generate changelog
+      id: changelog
+      run: |
+        # Get commits since last tag
+        LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+        if [ -z "$LAST_TAG" ]; then
+          COMMITS=$(git log --oneline --no-decorate)
+        else
+          COMMITS=$(git log --oneline --no-decorate ${LAST_TAG}..HEAD)
+        fi
+        
+        # Create changelog
+        echo "## التغييرات" > CHANGELOG_BODY.md
+        echo "" >> CHANGELOG_BODY.md
+        echo "### الإصدار ${{ steps.version.outputs.version }}" >> CHANGELOG_BODY.md
+        echo "" >> CHANGELOG_BODY.md
+        echo "$COMMITS" | while read -r line; do
+          echo "- $line" >> CHANGELOG_BODY.md
+        done
+        
+        echo "" >> CHANGELOG_BODY.md
+        echo "---" >> CHANGELOG_BODY.md
+        echo "" >> CHANGELOG_BODY.md
+        echo "**مرشد أذكار** - تطبيق إسلامي شامل لسطح المكتب" >> CHANGELOG_BODY.md
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.version.outputs.version }}
+        name: "مرشد أذكار ${{ steps.version.outputs.version }}"
+        body_path: CHANGELOG_BODY.md
+        draft: false
+        prerelease: false
+        files: |
+          artifacts/windows-builds/*.exe
+          artifacts/macos-builds/*.dmg
+          artifacts/linux-builds/*.AppImage
+          artifacts/linux-builds/*.deb
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Cleanup
+      run: |
+        rm -rf artifacts/
+        rm -f CHANGELOG_BODY.md
