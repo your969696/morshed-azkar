@@ -21,11 +21,30 @@ A comprehensive Islamic desktop application featuring morning and evening azkar,
 [![Download](https://img.shields.io/badge/تحميل-التطبيق-blue)](https://github.com/your969696/morshed-azkar/releases)
 [![Documentation](https://img.shields.io/badge/توثيق-مفصل-green)](https://github.com/your969696/morshed-azkar#readme)
 [![Contributing](https://img.shields.io/badge/مساهمة-محمّل-orange)](https://github.com/your969696/morshed-azkar/blob/main/CONTRIBUTING.md)
+[![Wiki](https://img.shields.io/badge/Wiki-شامل-blueviolet)](https://github.com/your969696/morshed-azkar/wiki)
 [![Roadmap](https://img.shields.io/badge/خطة-المستقبل-blueviolet)](https://github.com/your969696/morshed-azkar/blob/main/ROADMAP.md)
 [![Changelog](https://img.shields.io/badge/سجل-التغييرات-yellow)](https://github.com/your969696/morshed-azkar/blob/main/CHANGELOG.md)
 [![Code of Conduct](https://img.shields.io/badge/قواعد-السلوك-ff69b4)](https://github.com/your969696/morshed-azkar/blob/main/CODE_OF_CONDUCT.md)
 
 </div>
+
+---
+
+## 🤝 نبحث عن مساهمين | Contributors Wanted
+
+**هل ترغب في المساهمة؟** نبحث عن مطورين ومترجمين ومصممين للمساعدة في تطوير المشروع!
+
+**Want to contribute?** We're looking for developers, translators, and designers to help improve this project!
+
+### 🔥 Areas We Need Help:
+- [ ] **Frontend** - React, UI/UX improvements
+- [ ] **Mobile** - Android/iOS versions (Flutter)
+- [ ] **Translation** - Urdu, Bengali, Turkish, French
+- [ ] **Testing** - Write tests, report bugs
+- [ ] **Documentation** - Improve docs, write tutorials
+- [ ] **Design** - Icons, screenshots, branding
+
+**👉 ابدأ هنا:** [CONTRIBUTING.md](CONTRIBUTING.md) | **👉 الأخطاء المفتوحة:** [Good First Issues](https://github.com/your969696/morshed-azkar/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
 
 ---
 
