@@ -21,6 +21,9 @@ A comprehensive Islamic desktop application featuring morning and evening azkar,
 [![Download](https://img.shields.io/badge/تحميل-التطبيق-blue)](https://github.com/your969696/morshed-azkar/releases)
 [![Documentation](https://img.shields.io/badge/توثيق-مفصل-green)](https://github.com/your969696/morshed-azkar#readme)
 [![Contributing](https://img.shields.io/badge/مساهمة-محمّل-orange)](https://github.com/your969696/morshed-azkar/blob/main/CONTRIBUTING.md)
+[![Roadmap](https://img.shields.io/badge/خطة-المستقبل-blueviolet)](https://github.com/your969696/morshed-azkar/blob/main/ROADMAP.md)
+[![Changelog](https://img.shields.io/badge/سجل-التغييرات-yellow)](https://github.com/your969696/morshed-azkar/blob/main/CHANGELOG.md)
+[![Code of Conduct](https://img.shields.io/badge/قواعد-السلوك-ff69b4)](https://github.com/your969696/morshed-azkar/blob/main/CODE_OF_CONDUCT.md)
 
 </div>
 
@@ -504,6 +507,9 @@ For more details, see the [LICENSE](LICENSE) file or visit https://www.gnu.org/l
 
 - **المشكلات:** [GitHub Issues](https://github.com/your969696/morshed-azkar/issues)
 - **التواصل:** [GitHub Discussions](https://github.com/your969696/morshed-azkar/discussions)
+- **الخطة المستقبلية:** [ROADMAP.md](ROADMAP.md)
+- **سجل التغييرات:** [CHANGELOG.md](CHANGELOG.md)
+- **قواعد السلوك:** [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 
 ---
 
