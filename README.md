@@ -10,7 +10,7 @@
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.3.2-06B6D4?logo=tailwindcss&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES2024-F7DF1E?logo=javascript&logoColor=black)
 ![License](https://img.shields.io/badge/License-AGPL--3.0-green)
-![Version](https://img.shields.io/badge/Version-1.0.0-orange)
+![Version](https://img.shields.io/badge/Version-1.1.0-orange)
 ![PRs](https://img.shields.io/badge/PRs-Welcome-brightgreen)
 ![Issues](https://img.shields.io/badge/Issues-Welcome-yellow)
 

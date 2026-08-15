@@ -6,7 +6,7 @@
 ![React](https://img.shields.io/badge/React-19.2.7-61DAFB?logo=react&logoColor=black)
 ![Vite](https://img.shields.io/badge/Vite-8.1.0-646CFF?logo=vite&logoColor=white)
 ![License](https://img.shields.io/badge/License-AGPL--3.0-green)
-![Version](https://img.shields.io/badge/Version-1.0.0-orange)
+![Version](https://img.shields.io/badge/Version-1.1.0-orange)
 
 </div>
 

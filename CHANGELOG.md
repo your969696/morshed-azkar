@@ -10,6 +10,42 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.1.0] - 2026-08-15
+
+### التحسينات | Improvements
+
+#### CI/CD
+- ✅ إضافة GitHub Actions workflows
+- ✅ بناء تلقائي (Vite + Electron)
+- ✅ اختبار تلقائي على 3 أنظمة (Windows/macOS/Linux)
+- ✅ نشر تلقائي مع إنشاء Release
+- ✅ دعم بناء Windows (x64/ia32)
+- ✅ دعم بناء macOS (x64/arm64)
+- ✅ دعم بناء Linux (AppImage/deb)
+
+#### التوثيق
+- ✅ إنشاء Wiki شاملة (24 صفحة)
+- ✅ إضافة ENVIRONMENT.md
+- ✅ إضافة LOCAL_SETUP.md
+- ✅ إضافة TESTING.md
+- ✅ إضافة BUILD_GUIDE.md
+- ✅ إضافة DEPLOYMENT.md
+- ✅ تحديث README.md
+- ✅ تحديث CONTRIBUTING.md
+
+#### بنية المشروع
+- ✅ تنظيم ملفات .github
+- ✅ إضافة Issue templates
+- ✅ إضافة PR template
+- ✅ إضافة FUNDING.yml
+- ✅ تحديث .gitignore
+
+### الإصلاحات | Bug Fixes
+- ✅ إصلاح مشكلة oxlint في CI/CD
+- ✅ تحسين أداء البناء
+
+---
+
 ## [1.0.0] - 2026-08-14
 
 ### الميزات الرئيسية | Major Features
