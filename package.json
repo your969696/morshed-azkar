@@ -1,5 +1,5 @@
 {
-  "name": "azkar-app",
+  "name": "murshid-azkar",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -35,8 +35,8 @@
     "vite": "^8.1.0"
   },
   "build": {
-    "appId": "com.azkar.app",
-    "productName": "تطبيق الأذكار الإسلامية",
+    "appId": "com.murshid.azkar",
+    "productName": "مرشد أذكار",
     "directories": {
       "output": "release"
     },

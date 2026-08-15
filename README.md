@@ -1,6 +1,6 @@
 <div dir="rtl">
 
-# تطبيق الأذكار الإسلامية | Islamic Azkar App
+# مرشد أذكار | Murshid Azkar
 
 <div align="center">
 
@@ -23,7 +23,7 @@ A comprehensive Islamic desktop application featuring morning and evening azkar,
 
 تطبيق **الأذكار الإسلامية** هو تطبيق إسلامي شامل مبني لتلكيفيات سطح المكتب. يهدف التطبيق إلى تسهيل حياة المسلم اليومية من خلال توفير الأذكار والأدعية وأوقات الصلاة في مكان واحد مع واجهة سهلة الاستخدام وتصميم جذاب.
 
-**Islamic Azkar App** is a comprehensive Islamic application built for desktop platforms. It aims to make a Muslim's daily life easier by providing azkar, duas, and prayer times in one place with an easy-to-use interface and attractive design.
+**Murshid Azkar** is a comprehensive Islamic application built for desktop platforms. It aims to make a Muslim's daily life easier by providing azkar, duas, and prayer times in one place with an easy-to-use interface and attractive design.
 
 ---
 
@@ -93,7 +93,7 @@ A comprehensive Islamic desktop application featuring morning and evening azkar,
 ## هيكل المشروع | Project Structure
 
 ```
-azkar-app/
+murshid-azkar/
 │
 ├── electron/                    # ملفات Electron (الخادم المحلي)
 │   ├── main.cjs                 # ملف التشغيل الرئيسي للتطبيق
@@ -345,8 +345,8 @@ azkar-app/
 
 ```bash
 # 1. استنساخ المشروع
-git clone https://github.com/yourusername/azkar-app.git
-cd azkar-app
+git clone https://github.com/yourusername/murshid-azkar.git
+cd murshid-azkar
 
 # 2. تثبيت التبعيات
 npm install
@@ -509,8 +509,8 @@ SOFTWARE.
 
 ## الدعم والمساعدة | Support
 
-- **المشكلات:** [GitHub Issues](https://github.com/yourusername/azkar-app/issues)
-- **التواصل:** [GitHub Discussions](https://github.com/yourusername/azkar-app/discussions)
+- **المشكلات:** [GitHub Issues](https://github.com/yourusername/murshid-azkar/issues)
+- **التواصل:** [GitHub Discussions](https://github.com/yourusername/murshid-azkar/discussions)
 
 ---
 
@@ -536,3 +536,4 @@ SOFTWARE.
 بسم الله الرحمن الرحيم
 
 </div>
+

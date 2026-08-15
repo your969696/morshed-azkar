@@ -2,8 +2,8 @@
 
 # المساهمة في المشروع | Contributing
 
-شكراً لاهتمامك بالمساهمة في تطبيق الأذكار الإسلامية!
-Thank you for your interest in contributing to the Islamic Azkar App!
+شكراً لاهتمامك بالمساهمة في مرشد أذكار!
+Thank you for your interest in contributing to the Murshid Azkar!
 
 ---
 
@@ -229,8 +229,8 @@ git push origin feature/اسم-الميزة
 
 ## التواصل | Contact
 
-- **المشكلات:** [GitHub Issues](https://github.com/yourusername/azkar-app/issues)
-- **المناقشات:** [GitHub Discussions](https://github.com/yourusername/azkar-app/discussions)
+- **المشكلات:** [GitHub Issues](https://github.com/yourusername/murshid-azkar/issues)
+- **المناقشات:** [GitHub Discussions](https://github.com/yourusername/murshid-azkar/discussions)
 
 ---
 
@@ -241,3 +241,4 @@ git push origin feature/اسم-الميزة
 **May Allah accept from us and you good deeds**
 
 </div>
+
