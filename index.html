@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#0a0f1a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self';
+      script-src 'self' 'unsafe-inline';
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      font-src 'self' https://fonts.gstatic.com;
+      media-src 'self' file: blob: data: https://qurango.net https://*.qurango.net https://mp3quran.net https://*.mp3quran.net https://*.archive.org;
+      connect-src 'self' blob: data:
+        https://qurango.net https://*.qurango.net
+        https://mp3quran.net https://*.mp3quran.net
+        https://*.archive.org
+        https://nominatim.openstreetmap.org
+        https://overpass-api.de
+        https://api.open-meteo.com
+        https://*.tile.openstreetmap.org
+        https://world.openfoodfacts.org
+        https://static.openfoodfacts.org
+        https://images.openfoodfacts.org;
+      img-src 'self' data: https://*.tile.openstreetmap.org https://images.openfoodfacts.org;
+    " />
+    <style>
+      @font-face { font-family: 'Amiri Quran'; src: url('./fonts/AmiriQuran-Regular.ttf') format('truetype'); font-display: swap; }
+      @font-face { font-family: 'Cairo'; src: url('./fonts/Cairo-Variable.ttf') format('truetype'); font-weight: 100 900; font-display: swap; }
+    </style>
+    <title>الأذكار - تطبيق الأذكار الإسلامية</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

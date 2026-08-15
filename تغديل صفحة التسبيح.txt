@@ -1,0 +1,497 @@
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// ══════════════════════════════════════════
+// Audio Engine
+// ══════════════════════════════════════════
+let _tasbihCtx = null;
+function getTasbihCtx() {
+  if (!_tasbihCtx) _tasbihCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (_tasbihCtx.state === 'suspended') _tasbihCtx.resume();
+  return _tasbihCtx;
+}
+
+function playTapSound() {
+  try {
+    const ctx = getTasbihCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 880;
+    osc.type = 'sine';
+    gain.gain.value = 0.07;
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+    osc.stop(ctx.currentTime + 0.1);
+  } catch {}
+}
+
+function playCompleteSound() {
+  try {
+    const ctx = getTasbihCtx();
+    [523, 659, 784, 1047].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+      const t = ctx.currentTime + i * 0.15;
+      osc.start(t);
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.1, t + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+      osc.stop(t + 0.4);
+    });
+  } catch {}
+}
+
+// ══════════════════════════════════════════
+// Data
+// ══════════════════════════════════════════
+const tasbihOptions = [
+  { text: 'سُبْحَانَ اللَّه', target: 33, desc: 'التسبيح' },
+  { text: 'الْحَمْدُ لِلَّه', target: 33, desc: 'الحمد' },
+  { text: 'اللَّهُ أَكْبَر', target: 34, desc: 'التكبير' },
+  { text: 'لَا إِلَهَ إِلَّا اللَّه', target: 100, desc: 'التوحيد' },
+  { text: 'أَسْتَغْفِرُ اللَّه', target: 100, desc: 'الاستغفار' },
+  { text: 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ', target: 100, desc: 'وبحمده' },
+  { text: 'لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّه', target: 100, desc: 'الحوقلة' },
+  { text: 'اللَّهُمَّ صَلِّ عَلَى مُحَمَّد', target: 100, desc: 'الصلاة' },
+];
+
+// ══════════════════════════════════════════
+// Helpers
+// ══════════════════════════════════════════
+function loadJSON(key, fallback) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+  catch { return fallback; }
+}
+function saveJSON(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
+}
+function todayKey() { return new Date().toISOString().slice(0, 10); }
+
+// ══════════════════════════════════════════
+// Ring dimensions — scaled for 495px height
+// ══════════════════════════════════════════
+const RING_SIZE = 190;
+const RING_R = 82;
+const RING_C = 2 * Math.PI * RING_R;
+
+// ══════════════════════════════════════════
+// Component
+// ══════════════════════════════════════════
+export default function Tasbih() {
+  const [sel, setSel] = useState(0);
+  const [count, setCount] = useState(0);
+  const [total, setTotal] = useState(() => loadJSON('tasbih_total', 0));
+  const [daily, setDaily] = useState(() => {
+    const d = loadJSON('tasbih_daily', {});
+    return d.date === todayKey() ? d.count : 0;
+  });
+  const [soundOn, setSoundOn] = useState(true);
+  const [vibOn, setVibOn] = useState(true);
+  const [showDone, setShowDone] = useState(false);
+  const [ripples, setRipples] = useState([]);
+  const [sparks, setSparks] = useState([]);
+  const [flashBg, setFlashBg] = useState(false);
+  const tapsRef = useRef([]);
+
+  const opt = tasbihOptions[sel];
+  const target = opt.target;
+  const pct = target > 0 ? (count / target) * 100 : 0;
+  const done = count >= target;
+  const offset = RING_C * (1 - pct / 100);
+  const nearEnd = count >= target - 5 && !done;
+
+  // ── persist ──
+  useEffect(() => { saveJSON('tasbih_total', total); }, [total]);
+  useEffect(() => { saveJSON('tasbih_daily', { date: todayKey(), count: daily }); }, [daily]);
+
+  // ── reset on change ──
+  useEffect(() => { setCount(0); setShowDone(false); setSparks([]); }, [sel]);
+
+  // ── keyboard ──
+  useEffect(() => {
+    const h = (e) => {
+      if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); doTap(); }
+      if (e.code === 'Escape') handleReset();
+    };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  });
+
+  // ─────────────── TAP ───────────────
+  const doTap = useCallback(() => {
+    if (count >= target) return;
+
+    const n = count + 1;
+    setCount(n);
+    setTotal(t => t + 1);
+    setDaily(d => d + 1);
+
+    setFlashBg(true);
+    setTimeout(() => setFlashBg(false), 100);
+
+    const now = Date.now();
+    tapsRef.current.push(now);
+    tapsRef.current = tapsRef.current.filter(t => now - t < 60000);
+
+    const rid = now + Math.random();
+    setRipples(p => [...p, rid]);
+    setTimeout(() => setRipples(p => p.filter(r => r !== rid)), 600);
+
+    if (vibOn && navigator.vibrate) navigator.vibrate(15);
+    if (soundOn) playTapSound();
+
+    if (n >= target) {
+      setShowDone(true);
+      if (soundOn) setTimeout(playCompleteSound, 200);
+      if (vibOn && navigator.vibrate) navigator.vibrate([40, 30, 40, 30, 80]);
+
+      const s = Array.from({ length: 20 }, (_, i) => ({
+        id: now + i,
+        angle: (i / 20) * 360 + Math.random() * 18,
+        dist: 55 + Math.random() * 70,
+        size: 3 + Math.random() * 5,
+        delay: Math.random() * 0.12,
+        hue: 260 + Math.random() * 100,
+      }));
+      setSparks(s);
+      setTimeout(() => setSparks([]), 1400);
+    }
+  }, [count, target, vibOn, soundOn]);
+
+  const handleReset = () => {
+    setCount(0);
+    setShowDone(false);
+    setSparks([]);
+  };
+
+  // ─────────────── RENDER ───────────────
+  return (
+    <div className="flex flex-col" style={{ height: '100%', overflow: 'hidden' }}>
+      {/* flash overlay */}
+      <AnimatePresence>
+        {flashBg && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.1 }}
+            className="fixed inset-0 z-50 pointer-events-none"
+            style={{ background: 'radial-gradient(circle at center, rgba(139,92,246,0.06) 0%, transparent 60%)' }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* ═══════════ HEADER — compact ═══════════ */}
+      <div className="relative flex-shrink-0" style={{ height: 80 }}>
+        <div className="absolute inset-0" style={{
+          background: 'linear-gradient(150deg, #080416 0%, #12082e 40%, #1e0e4a 80%, #0f0620 100%)',
+        }}>
+          <div className="absolute inset-0 opacity-[0.03]" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 0L40 20L20 40L0 20Z' fill='none' stroke='%23fff' stroke-width='.4'/%3E%3C/svg%3E")`,
+            backgroundSize: '40px 40px',
+          }} />
+          <div className="absolute w-64 h-64 rounded-full -top-16 -right-16"
+            style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.1) 0%, transparent 70%)' }} />
+        </div>
+
+        <div className="relative z-10 h-full flex items-center justify-between px-5">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/15"
+              style={{ background: 'linear-gradient(135deg, #8b5cf6, #a855f7)' }}>
+              <span className="text-base">📿</span>
+            </div>
+            <div>
+              <h1 className="text-base font-extrabold text-white tracking-tight leading-tight">التسبيح</h1>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className="text-[10px] text-white/30">الكلي: <span className="text-white/50 font-medium">{total.toLocaleString()}</span></span>
+                <span className="text-[10px] text-white/15">|</span>
+                <span className="text-[10px] text-white/30">اليوم: <span className="text-emerald-400/70 font-medium">{daily}</span></span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1">
+            {[
+              { active: soundOn, toggle: () => setSoundOn(!soundOn), icon: soundOn ? '🔊' : '🔇' },
+              { active: vibOn, toggle: () => setVibOn(!vibOn), icon: '📳' },
+            ].map((b, i) => (
+              <button key={i} onClick={b.toggle}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-xs transition-all"
+                style={{
+                  background: b.active ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.05)',
+                }}>
+                {b.icon}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ═══════════ MAIN CONTENT — flex-grow ═══════════ */}
+      <div className="flex flex-col items-center flex-1 px-4 pt-3 pb-3" style={{ minHeight: 0 }}>
+
+        {/* ── Dhikr pills — scrollable row ── */}
+        <div className="w-full flex-shrink-0 mb-3 overflow-x-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          <style>{`.t-scroll::-webkit-scrollbar{display:none}`}</style>
+          <div className="t-scroll flex gap-1.5" style={{ minWidth: 'max-content' }}>
+            {tasbihOptions.map((o, i) => {
+              const active = sel === i;
+              return (
+                <motion.button
+                  key={i}
+                  onClick={() => setSel(i)}
+                  whileTap={{ scale: 0.95 }}
+                  className="relative px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all whitespace-nowrap"
+                  style={{
+                    background: active ? 'linear-gradient(135deg, #8b5cf6, #c026d3)' : 'rgba(255,255,255,0.03)',
+                    border: active ? '1px solid rgba(139,92,246,0.3)' : '1px solid rgba(255,255,255,0.04)',
+                    color: active ? '#fff' : 'rgba(255,255,255,0.4)',
+                    boxShadow: active ? '0 2px 12px rgba(139,92,246,0.2)' : 'none',
+                  }}
+                >
+                  <span className="flex items-center gap-1.5">
+                    {o.desc}
+                    <span className="text-[9px] opacity-40 font-normal">({o.target})</span>
+                  </span>
+                </motion.button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ── Dhikr text ── */}
+        <motion.div
+          key={sel}
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35 }}
+          className="flex-shrink-0 mb-2"
+        >
+          <p className="text-lg font-bold text-center" style={{
+            fontFamily: 'var(--font-naskh), "Amiri", serif',
+            background: 'linear-gradient(135deg, #e0d0f7, #f5c8d8)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            direction: 'rtl',
+          }}>
+            {opt.text}
+          </p>
+        </motion.div>
+
+        {/* ── SVG ring + tap button — centered ── */}
+        <div className="flex-shrink-0 relative" style={{ width: RING_SIZE, height: RING_SIZE }}>
+          <svg width={RING_SIZE} height={RING_SIZE} viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}
+            className="absolute inset-0" style={{ transform: 'rotate(-90deg)' }}>
+            <defs>
+              <linearGradient id="tg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#8b5cf6" />
+                <stop offset="50%" stopColor="#a855f7" />
+                <stop offset="100%" stopColor="#ec4899" />
+              </linearGradient>
+              <linearGradient id="tgGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor={done ? '#34d399' : '#8b5cf6'} stopOpacity="0.2" />
+                <stop offset="100%" stopColor={done ? '#34d399' : '#ec4899'} stopOpacity="0.2" />
+              </linearGradient>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="2.5" result="blur" />
+                <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+              </filter>
+            </defs>
+
+            {/* track */}
+            <circle cx={RING_SIZE / 2} cy={RING_SIZE / 2} r={RING_R} fill="none"
+              stroke="rgba(255,255,255,0.025)" strokeWidth={8} />
+
+            {/* glow behind */}
+            <motion.circle
+              cx={RING_SIZE / 2} cy={RING_SIZE / 2} r={RING_R}
+              fill="none" stroke="url(#tgGlow)" strokeWidth={18}
+              strokeLinecap="round"
+              strokeDasharray={RING_C}
+              animate={{ strokeDashoffset: offset }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+            />
+
+            {/* progress arc */}
+            <motion.circle
+              cx={RING_SIZE / 2} cy={RING_SIZE / 2} r={RING_R}
+              fill="none"
+              stroke={done ? '#34d399' : 'url(#tg)'}
+              strokeWidth={nearEnd ? 10 : 8}
+              strokeLinecap="round"
+              strokeDasharray={RING_C}
+              filter={nearEnd || done ? 'url(#glow)' : undefined}
+              animate={{ strokeDashoffset: offset }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+            />
+
+            {/* tick marks */}
+            {Array.from({ length: 36 }, (_, i) => {
+              const a = (i / 36) * 2 * Math.PI;
+              const cx = RING_SIZE / 2;
+              const cy = RING_SIZE / 2;
+              const r1 = RING_R - 13;
+              const r2 = RING_R - 16;
+              return (
+                <line key={i}
+                  x1={cx + r1 * Math.cos(a)} y1={cy + r1 * Math.sin(a)}
+                  x2={cx + r2 * Math.cos(a)} y2={cy + r2 * Math.sin(a)}
+                  stroke="rgba(255,255,255,0.05)" strokeWidth={1} strokeLinecap="round"
+                  transform={`rotate(90 ${cx} ${cy})`}
+                />
+              );
+            })}
+          </svg>
+
+          {/* center tap area */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <motion.button
+              onClick={doTap}
+              whileTap={{ scale: 0.92 }}
+              className="relative rounded-full flex flex-col items-center justify-center cursor-pointer select-none"
+              style={{
+                width: RING_SIZE - 30,
+                height: RING_SIZE - 30,
+                background: done
+                  ? 'radial-gradient(circle, rgba(52,211,153,0.1) 0%, rgba(52,211,153,0.01) 70%)'
+                  : nearEnd
+                    ? 'radial-gradient(circle, rgba(168,85,247,0.12) 0%, rgba(236,72,153,0.02) 70%)'
+                    : 'radial-gradient(circle, rgba(139,92,246,0.06) 0%, rgba(236,72,153,0.01) 70%)',
+              }}
+            >
+              {/* ripples */}
+              {ripples.map(id => (
+                <motion.div key={id}
+                  initial={{ width: 20, height: 20, opacity: 0.35 }}
+                  animate={{ width: 170, height: 170, opacity: 0 }}
+                  transition={{ duration: 0.55, ease: 'easeOut' }}
+                  className="absolute rounded-full pointer-events-none"
+                  style={{ border: `2px solid ${done ? '#34d399' : '#a855f7'}` }}
+                />
+              ))}
+
+              {/* sparks */}
+              {sparks.map(p => (
+                <motion.div key={p.id}
+                  initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
+                  animate={{
+                    x: Math.cos((p.angle * Math.PI) / 180) * p.dist,
+                    y: Math.sin((p.angle * Math.PI) / 180) * p.dist,
+                    opacity: 0, scale: 0.2,
+                  }}
+                  transition={{ duration: 0.8, delay: p.delay, ease: 'easeOut' }}
+                  className="absolute rounded-full pointer-events-none"
+                  style={{
+                    width: p.size, height: p.size,
+                    background: `hsl(${p.hue}, 85%, 68%)`,
+                    boxShadow: `0 0 5px hsl(${p.hue}, 85%, 68%)`,
+                  }}
+                />
+              ))}
+
+              {/* counter number */}
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={done ? 'done' : count}
+                  initial={{ scale: 1.3, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.6, opacity: 0 }}
+                  transition={{ duration: 0.18 }}
+                  className="text-5xl font-extrabold"
+                  style={{
+                    color: done ? '#34d399' : '#fff',
+                    fontFamily: 'var(--font-naskh), "Amiri", serif',
+                    textShadow: done ? '0 0 24px rgba(52,211,153,0.25)' : '0 0 20px rgba(139,92,246,0.15)',
+                    lineHeight: 1,
+                  }}
+                >
+                  {done ? '✓' : target - count}
+                </motion.span>
+              </AnimatePresence>
+
+              <span className="text-[10px] mt-0.5 font-medium"
+                style={{ color: done ? 'rgba(52,211,153,0.6)' : 'rgba(255,255,255,0.25)' }}>
+                {done ? 'تمّ بحمد الله' : 'متبقي'}
+              </span>
+
+              {/* pulse near end */}
+              {nearEnd && (
+                <motion.div className="absolute inset-0 rounded-full pointer-events-none"
+                  animate={{ scale: [1, 1.06, 1], opacity: [0.12, 0.04, 0.12] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                  style={{ border: '2px solid #a855f7' }}
+                />
+              )}
+            </motion.button>
+          </div>
+        </div>
+
+        {/* ── Progress bar ── */}
+        <div className="w-full max-w-[260px] flex-shrink-0 mt-2">
+          <div className="flex justify-between text-[10px] mb-1">
+            <span className="text-white/25 font-medium">{count} / {target}</span>
+            <span className="text-white/25 font-medium">{Math.round(pct)}%</span>
+          </div>
+          <div className="w-full rounded-full overflow-hidden" style={{ height: 4, background: 'rgba(255,255,255,0.03)' }}>
+            <motion.div className="h-full rounded-full"
+              style={{ background: done ? '#34d399' : 'linear-gradient(90deg, #8b5cf6, #c026d3, #ec4899)' }}
+              animate={{ width: `${pct}%` }}
+              transition={{ duration: 0.2 }}
+            />
+          </div>
+        </div>
+
+        {/* ── Bottom controls row ── */}
+        <div className="flex items-center justify-center gap-3 flex-shrink-0 mt-3">
+          <motion.button onClick={handleReset} whileTap={{ scale: 0.95 }}
+            className="flex items-center gap-1.5 px-5 py-1.5 rounded-xl text-xs font-bold transition-all"
+            style={{
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.05)',
+              color: 'rgba(255,255,255,0.45)',
+            }}>
+            <span>↺</span>
+            <span>إعادة</span>
+          </motion.button>
+
+          {/* ayah — compact inline */}
+          <p className="text-[10px] text-white/20 max-w-[200px] text-center truncate" style={{
+            fontFamily: 'var(--font-naskh), "Amiri", serif',
+            direction: 'rtl',
+          }}>
+            {count === 0 && 'فَسَبِّحْ بِحَمْدِ رَبِّكَ'}
+            {count > 0 && !done && count < target * 0.5 && 'أَحَبُّ الْأَعْمَالِ أَدْوَمُهَا وَإِنْ قَلَّ'}
+            {count >= target * 0.5 && !done && 'وَالذَّاكِرِينَ اللَّهَ كَثِيرًا'}
+            {done && 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ'}
+          </p>
+        </div>
+
+        {/* ── Completion toast ── */}
+        <AnimatePresence>
+          {showDone && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.85, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.85, y: -10 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+              className="mt-2 px-6 py-3 rounded-2xl text-center flex-shrink-0"
+              style={{
+                background: 'linear-gradient(135deg, rgba(52,211,153,0.1), rgba(52,211,153,0.02))',
+                border: '1px solid rgba(52,211,153,0.15)',
+              }}
+            >
+              <p className="text-emerald-400 font-extrabold text-sm">أحسنت! تم إتمام {opt.desc}</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}

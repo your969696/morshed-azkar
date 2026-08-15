@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prayer Widget</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: #12082a;
+      color: #fff;
+      direction: rtl;
+      overflow: hidden;
+      user-select: none;
+      -webkit-app-region: drag;
+      height: 100vh;
+      transition: background 0.5s;
+    }
+    body.azan-mode {
+      background: linear-gradient(145deg, #0a1628 0%, #1a0a3a 50%, #0a1628 100%);
+      animation: azanPulse 2s ease-in-out infinite;
+    }
+    @keyframes azanPulse {
+      0%, 100% { box-shadow: inset 0 0 20px rgba(0, 200, 150, 0.05); }
+      50% { box-shadow: inset 0 0 30px rgba(0, 200, 150, 0.15); }
+    }
+    .widget {
+      width: 100%; height: 100%;
+      padding: 10px 14px;
+      display: flex; flex-direction: column; justify-content: center; gap: 4px;
+      position: relative;
+      border: 1px solid rgba(0, 200, 150, 0.2);
+      border-radius: 12px;
+      background: transparent;
+      transition: border-color 0.5s;
+    }
+    body.azan-mode .widget {
+      border-color: rgba(0, 200, 150, 0.5);
+    }
+    .top-row { display: flex; align-items: center; gap: 8px; }
+    .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: rgba(0, 200, 150, 0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+      transition: background 0.5s;
+    }
+    body.azan-mode .icon {
+      background: rgba(0, 200, 150, 0.3);
+      animation: iconGlow 1.5s ease-in-out infinite;
+    }
+    @keyframes iconGlow {
+      0%, 100% { box-shadow: 0 0 8px rgba(0, 200, 150, 0.3); }
+      50% { box-shadow: 0 0 16px rgba(0, 200, 150, 0.6); }
+    }
+    .prayer-name { font-size: 13px; font-weight: 600; color: #00c896; }
+    .prayer-time-label { font-size: 10px; color: rgba(255, 255, 255, 0.4); }
+    .countdown {
+      font-size: 28px; font-weight: 800; letter-spacing: 2px;
+      text-align: center; color: #fff;
+      font-variant-numeric: tabular-nums; direction: ltr;
+      margin: 2px 0;
+      transition: color 0.3s, font-size 0.3s;
+    }
+    body.azan-mode .countdown {
+      color: #00c896;
+      font-size: 14px;
+      direction: rtl;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      letter-spacing: 0;
+      font-weight: 700;
+    }
+    .azan-message {
+      display: none;
+      text-align: center;
+      margin: 4px 0;
+    }
+    body.azan-mode .azan-message { display: block; }
+    body:not(.azan-mode) .countdown-wrapper .countdown { display: block; }
+    body.azan-mode .countdown-wrapper .countdown { display: none; }
+    .progress {
+      height: 3px; background: rgba(255, 255, 255, 0.08);
+      border-radius: 2px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #00c896, #8b5cf6);
+      border-radius: 2px; transition: width 1s linear;
+    }
+    body.azan-mode .progress { display: none; }
+    .prayers-row { display: flex; gap: 3px; margin-top: 2px; }
+    .mini-prayer {
+      flex: 1; text-align: center; padding: 2px 0;
+      border-radius: 4px; background: rgba(255, 255, 255, 0.03);
+      transition: background 0.3s;
+    }
+    .mini-prayer.active { background: rgba(0, 200, 150, 0.15); }
+    .mini-prayer .mp-name { font-size: 8px; color: rgba(255, 255, 255, 0.4); }
+    .mini-prayer.active .mp-name { color: #00c896; }
+    .mini-prayer .mp-time {
+      font-size: 9px; color: rgba(255, 255, 255, 0.6);
+      font-variant-numeric: tabular-nums; direction: ltr;
+    }
+    .mini-prayer.active .mp-time { color: #fff; }
+    .close-btn {
+      position: absolute; top: 4px; left: 4px;
+      width: 18px; height: 18px; border-radius: 4px;
+      background: rgba(255, 255, 255, 0.06); border: none;
+      color: rgba(255, 255, 255, 0.3); font-size: 10px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      -webkit-app-region: no-drag; transition: all 0.15s;
+    }
+    .close-btn:hover { background: rgba(255, 60, 60, 0.2); color: #ff6b6b; }
+    .dhikr-peek {
+      position: absolute; bottom: 6px; left: 10px; right: 10px;
+      text-align: center; padding: 4px 8px; border-radius: 8px;
+      background: rgba(240, 176, 64, 0.1); border: 1px solid rgba(240, 176, 64, 0.2);
+      font-size: 11px; font-weight: 700; color: #f0b040; direction: rtl;
+      opacity: 0; transform: translateY(6px);
+      transition: opacity 0.5s, transform 0.5s;
+      pointer-events: none; z-index: 10;
+    }
+    .dhikr-peek.show { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+  <div class="widget">
+    <button class="close-btn" id="closeBtn">✕</button>
+    <div class="top-row">
+      <div class="icon" id="icon">🕌</div>
+      <div>
+        <div class="prayer-name" id="prayerName">—</div>
+        <div class="prayer-time-label" id="timeLabel">الصلاة القادمة</div>
+      </div>
+    </div>
+    <div class="countdown-wrapper">
+      <div class="countdown" id="countdown">--:--:--</div>
+      <div class="azan-message" id="azanMessage">حان الآن الأذان</div>
+    </div>
+    <div class="progress"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+    <div class="dhikr-peek" id="dhikrPeek"></div>
+    <div class="prayers-row" id="prayersRow"></div>
+  </div>
+
+  <script>
+    var names = { Fajr:'الفجر', Sunrise:'الشروق', Dhuhr:'الظهر', Asr:'العصر', Maghrib:'المغرب', Isha:'العشاء' };
+    var emojis = { Fajr:'🌅', Sunrise:'☀️', Dhuhr:'🌤️', Asr:'🌇', Maghrib:'🌅', Isha:'🌙' };
+    var keys = ['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'];
+    var allPrayers = {};
+    var receivedFromApp = false;
+    var isLoading = true;
+    var isAzanMode = false;
+    var azanTimeout = null;
+    var dhikrIdx = 0;
+    var ADHKAR = [
+      'سُبْحَانَ اللَّه', 'الْحَمْدُ لِلَّه', 'اللَّهُ أَكْبَر',
+      'لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ',
+      'أَسْتَغْفِرُ اللَّه', 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',
+      'لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّه',
+      'سُبْحَانَ اللَّهِ الْعَظِيمِ وَبِحَمْدِهِ',
+      'اللَّهُمَّ صَلِّ عَلَى مُحَمَّد',
+      'رَبِّ اغْفِرْ لِي وَتُبْ عَلَيَّ',
+      'اللَّهُمَّ أَعِنِّي عَلَى ذِكْرِكَ وَشُكْرِكَ',
+      'يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ',
+      'سُبْحَانَ اللَّهِ وَالْحَمْدُ لِلَّهِ وَلَا إِلَهَ إِلَّا اللَّهُ وَاللَّهُ أَكْبَرُ',
+      'رَضِيتُ بِاللَّهِ رَبًّا وَبِالْإِسْلَامِ دِينًا وَبِمُحَمَّدٍ نَبِيًّا',
+    ];
+    var peekEl = document.getElementById('dhikrPeek');
+    var peekHideTimeout = null;
+    function showDhikrPeek() {
+      if (isAzanMode) return;
+      var dhikr = ADHKAR[dhikrIdx % ADHKAR.length];
+      dhikrIdx++;
+      peekEl.textContent = dhikr;
+      peekEl.classList.add('show');
+      if (peekHideTimeout) clearTimeout(peekHideTimeout);
+      peekHideTimeout = setTimeout(function() { peekEl.classList.remove('show'); }, 30000);
+    }
+    setInterval(showDhikrPeek, 1800000);
+    setTimeout(showDhikrPeek, 10000);
+
+    // Show loading state until real data arrives from the app
+
+    function fmt12(t) {
+      if (!t) return '';
+      var parts = t.split(':').map(Number);
+      var h = parts[0], m = parts[1];
+      var ampm = h >= 12 ? 'م' : 'ص';
+      var h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+      return h12 + ':' + String(m).padStart(2, '0') + ' ' + ampm;
+    }
+
+    function fmtCountdown(s) {
+      if (s <= 0) return '00:00';
+      var h = Math.floor(s / 3600);
+      var m = Math.floor((s % 3600) / 60);
+      var sec = s % 60;
+      if (h > 0) return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+      return String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+    }
+
+    function activateAzanMode(prayerKey) {
+      if (isAzanMode) return;
+      isAzanMode = true;
+      document.body.classList.add('azan-mode');
+      document.getElementById('prayerName').textContent = names[prayerKey] || '—';
+      document.getElementById('icon').textContent = emojis[prayerKey] || '🕌';
+      document.getElementById('timeLabel').textContent = 'حان الآن الأذان';
+      document.getElementById('azanMessage').textContent = '🕌 حان الآن أذان ' + (names[prayerKey] || '');
+
+      if (azanTimeout) clearTimeout(azanTimeout);
+      azanTimeout = setTimeout(function() {
+        isAzanMode = false;
+        document.body.classList.remove('azan-mode');
+        document.getElementById('timeLabel').textContent = 'الصلاة القادمة';
+        render();
+      }, 120000);
+    }
+
+    var lastPrayerKey = '';
+
+    function render() {
+      if (isLoading || Object.keys(allPrayers).length === 0) {
+        document.getElementById('prayerName').textContent = 'جاري التحميل...';
+        document.getElementById('icon').textContent = '🕌';
+        document.getElementById('countdown').textContent = '--:--';
+        document.getElementById('progress').style.width = '0%';
+        var row = document.getElementById('prayersRow');
+        row.innerHTML = '';
+        return;
+      }
+
+      var now = new Date();
+      var nowSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+      var nextSecLeft = Infinity, nextPrayerKey = '';
+      for (var i = 0; i < keys.length; i++) {
+        var k = keys[i];
+        var t = allPrayers[k];
+        if (!t) continue;
+        var parts = t.split(':').map(Number);
+        var pSec = parts[0] * 3600 + parts[1] * 60;
+        var diff = pSec - nowSec;
+        if (diff > 0 && diff < nextSecLeft) { nextSecLeft = diff; nextPrayerKey = k; }
+      }
+      if (!nextPrayerKey) {
+        var f = allPrayers.Fajr;
+        if (f) {
+          var fp = f.split(':').map(Number);
+          nextSecLeft = (24 * 3600 - nowSec) + (fp[0] * 3600 + fp[1] * 60);
+          nextPrayerKey = 'Fajr';
+        }
+      }
+
+      if (nextPrayerKey && nextPrayerKey !== lastPrayerKey) {
+        if (lastPrayerKey && !isAzanMode) {
+          activateAzanMode(lastPrayerKey);
+        }
+        lastPrayerKey = nextPrayerKey;
+      }
+
+      if (isAzanMode) return;
+
+      document.getElementById('prayerName').textContent = names[nextPrayerKey] || '—';
+      document.getElementById('icon').textContent = emojis[nextPrayerKey] || '🕌';
+      document.getElementById('countdown').textContent = fmtCountdown(nextSecLeft);
+      var daySec = 24 * 3600;
+      var elapsed = (daySec - nextSecLeft) % daySec;
+      document.getElementById('progress').style.width = Math.min(100, (elapsed / (elapsed + nextSecLeft)) * 100) + '%';
+      var row = document.getElementById('prayersRow');
+      row.innerHTML = '';
+      for (var j = 0; j < keys.length; j++) {
+        var k2 = keys[j];
+        var div = document.createElement('div');
+        div.className = 'mini-prayer' + (k2 === nextPrayerKey ? ' active' : '');
+        div.innerHTML = '<div class="mp-name">' + names[k2] + '</div><div class="mp-time">' + fmt12(allPrayers[k2]) + '</div>';
+        row.appendChild(div);
+      }
+    }
+
+    setInterval(render, 1000);
+    render();
+
+    document.getElementById('closeBtn').addEventListener('click', function() {
+      if (window.electronAPI) window.electronAPI.hideWidget();
+    });
+
+    if (window.electronAPI && window.electronAPI.onPrayerData) {
+      window.electronAPI.onPrayerData(function(data) {
+        if (data && data.prayers && Object.keys(data.prayers).length > 0) {
+          allPrayers = data.prayers;
+          receivedFromApp = true;
+          isLoading = false;
+          render();
+        }
+      });
+    }
+
+    // Request data from app after 1 second (ensure widget is fully loaded)
+    setTimeout(function() {
+      if (window.electronAPI && window.electronAPI.requestPrayerData) {
+        window.electronAPI.requestPrayerData();
+      }
+    }, 1000);
+  </script>
+</body>
+</html>

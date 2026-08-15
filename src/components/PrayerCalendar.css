@@ -1,0 +1,215 @@
+.prayer-calendar {
+  background: var(--bg-color);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.prayer-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.nav-btn {
+  background: var(--btn-color);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  color: var(--text-color);
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.nav-btn:hover {
+  background: var(--btn-hover);
+}
+
+.month-title {
+  text-align: center;
+}
+
+.gregorian-month {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.calendar-toggle {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.toggle-btn {
+  background: var(--btn-color);
+  border: none;
+  border-radius: 20px;
+  padding: 8px 20px;
+  color: var(--text-color);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.toggle-btn.active {
+  background: var(--accent-color);
+  color: white;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-color);
+}
+
+.prayer-calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.weekday {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 8px 0;
+}
+
+.prayer-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.prayer-calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--card-color);
+}
+
+.prayer-calendar-day:hover {
+  background: var(--btn-color);
+}
+
+.prayer-calendar-day.today {
+  background: var(--accent-color);
+  color: white;
+  font-weight: bold;
+}
+
+.prayer-calendar-day.holiday {
+  border: 2px solid #f59e0b;
+}
+
+.prayer-calendar-day.empty {
+  background: transparent;
+  cursor: default;
+}
+
+.day-gregorian {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.day-hijri {
+  font-size: 10px;
+  color: var(--text-secondary);
+  font-family: 'Amiri', serif;
+}
+
+.day-holiday {
+  font-size: 10px;
+}
+
+.day-details {
+  background: var(--card-color);
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 16px;
+}
+
+.day-details-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.day-number {
+  font-size: 32px;
+  font-weight: bold;
+  color: var(--accent-color);
+}
+
+.day-hijri-full {
+  font-size: 16px;
+  color: var(--text-secondary);
+  font-family: 'Amiri', serif;
+}
+
+.prayer-times-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.prayer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--bg-color);
+  border-radius: 8px;
+}
+
+.prayer-row.extra {
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.prayer-name {
+  font-size: 14px;
+  color: var(--text-color);
+}
+
+.prayer-time {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--accent-color);
+  font-family: 'monospace', monospace;
+}
+
+.prayer-divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: 8px 0;
+}
+
+.holidays-section {
+  margin-top: 16px;
+  padding: 12px;
+  background: rgba(245, 158, 11, 0.1);
+  border-radius: 8px;
+}
+
+.holidays-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #f59e0b;
+}
+
+.holiday-item {
+  padding: 6px 0;
+  font-size: 14px;
+  color: var(--text-color);
+}

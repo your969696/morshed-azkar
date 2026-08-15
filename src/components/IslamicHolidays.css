@@ -1,0 +1,110 @@
+.islamic-holidays {
+  background: var(--bg-color);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.holidays-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.next-holiday-card {
+  background: linear-gradient(135deg, var(--accent-color), #ec4899);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  color: white;
+  margin-bottom: 24px;
+}
+
+.next-holiday-label {
+  font-size: 14px;
+  opacity: 0.9;
+  margin-bottom: 8px;
+}
+
+.next-holiday-name {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.next-holiday-days {
+  font-size: 18px;
+  opacity: 0.95;
+}
+
+.next-holiday-days strong {
+  font-size: 28px;
+}
+
+.holidays-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.holiday-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--card-color);
+  border-radius: 12px;
+  transition: all 0.2s;
+}
+
+.holiday-card:hover {
+  transform: translateX(-4px);
+}
+
+.holiday-card.next {
+  border: 2px solid var(--accent-color);
+}
+
+.holiday-emoji {
+  font-size: 32px;
+}
+
+.holiday-info {
+  flex: 1;
+}
+
+.holiday-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.holiday-date {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-family: 'Amiri', serif;
+}
+
+.holiday-days {
+  text-align: left;
+}
+
+.today-badge {
+  background: #10b981;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.days-badge {
+  background: var(--btn-color);
+  color: var(--text-color);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
