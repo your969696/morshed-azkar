@@ -1,5 +1,5 @@
 {
-  "name": "murshid-azkar",
+  "name": "morshed-azkar",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -35,7 +35,7 @@
     "vite": "^8.1.0"
   },
   "build": {
-    "appId": "com.murshid.azkar",
+    "appId": "com.morshed.azkar",
     "productName": "مرشد أذكار",
     "directories": {
       "output": "release"

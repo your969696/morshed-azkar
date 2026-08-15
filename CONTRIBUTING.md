@@ -3,7 +3,7 @@
 # المساهمة في المشروع | Contributing
 
 شكراً لاهتمامك بالمساهمة في مرشد أذكار!
-Thank you for your interest in contributing to the Murshid Azkar!
+Thank you for your interest in contributing to the Morshed Azkar!
 
 ---
 
@@ -229,8 +229,8 @@ git push origin feature/اسم-الميزة
 
 ## التواصل | Contact
 
-- **المشكلات:** [GitHub Issues](https://github.com/yourusername/murshid-azkar/issues)
-- **المناقشات:** [GitHub Discussions](https://github.com/yourusername/murshid-azkar/discussions)
+- **المشكلات:** [GitHub Issues](https://github.com/yourusername/Morshed-azkar/issues)
+- **المناقشات:** [GitHub Discussions](https://github.com/yourusername/Morshed-azkar/discussions)
 
 ---
 
@@ -241,4 +241,5 @@ git push origin feature/اسم-الميزة
 **May Allah accept from us and you good deeds**
 
 </div>
+
 
