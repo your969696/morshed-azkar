@@ -8,7 +8,7 @@
 ![React](https://img.shields.io/badge/React-19.2.7-61DAFB?logo=react)
 ![Vite](https://img.shields.io/badge/Vite-8.1.0-646CFF?logo=vite)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.3.2-06B6D4?logo=tailwindcss)
-![License](https://img.shields.io/badge/License-MIT-green)
+![License](https://img.shields.io/badge/License-AGPL--3.0-blue)
 ![Version](https://img.shields.io/badge/Version-1.0.0-orange)
 
 **تطبيق إسلامي شامل لسطح المكتب يحتوي على أذكار الصباح والمساء، أوقات الصلاة مع عداد تنازلي، القرآن الكريم، أدعية مسنونة، أسماء الله الحسنى، وإرشاد الحلال والحرام.**
@@ -21,7 +21,7 @@ A comprehensive Islamic desktop application featuring morning and evening azkar,
 
 ## مقدمة | Introduction
 
-تطبيق **الأذكار الإسلامية** هو تطبيق إسلامي شامل مبني لتلكيفيات سطح المكتب. يهدف التطبيق إلى تسهيل حياة المسلم اليومية من خلال توفير الأذكار والأدعية وأوقات الصلاة في مكان واحد مع واجهة سهلة الاستخدام وتصميم جذاب.
+تطبيق **مرشد أذكار** هو تطبيق إسلامي شامل مبني لتلكيفيات سطح المكتب. يهدف التطبيق إلى تسهيل حياة المسلم اليومية من خلال توفير الأذكار والأدعية وأوقات الصلاة في مكان واحد مع واجهة سهلة الاستخدام وتصميم جذاب.
 
 **Morshed Azkar** is a comprehensive Islamic application built for desktop platforms. It aims to make a Muslim's daily life easier by providing azkar, duas, and prayer times in one place with an easy-to-use interface and attractive design.
 
@@ -477,40 +477,25 @@ git push origin feature/اسم-الميزة
 
 ## الرخصة | License
 
-هذا المشروع مرخص تحت رخصة **MIT License**.
+هذا المشروع مرخص تحت رخصة **GNU Affero General Public License v3.0 (AGPL-3.0)**.
 
-This project is licensed under the **MIT License**.
+This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.
 
-```
-MIT License
+这意味着：
+- يمكنك استخدام ونسخ وتوزيع البرنامج
+- يمكنك تعديله وتحسينه
+- يجب أن تكون جميع التعديلات مفتوحة المصدر
+- يجب أن تحمل نفس الرخصة (AGPL-3.0)
+- يجب أن توفر المصدر لكل التغييرات
 
-Copyright (c) 2026 Hatem
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
+For more details, see the [LICENSE](LICENSE) file or visit https://www.gnu.org/licenses/agpl-3.0.html
 
 ---
 
 ## الدعم والمساعدة | Support
 
-- **المشكلات:** [GitHub Issues](https://github.com/yourusername/Morshed-azkar/issues)
-- **التواصل:** [GitHub Discussions](https://github.com/yourusername/Morshed-azkar/discussions)
+- **المشكلات:** [GitHub Issues](https://github.com/your969696/morshed-azkar/issues)
+- **التواصل:** [GitHub Discussions](https://github.com/your969696/morshed-azkar/discussions)
 
 ---
 

@@ -227,10 +227,26 @@ git push origin feature/اسم-الميزة
 
 ---
 
+## الرخصة | License
+
+هذا المشروع مرخص تحت رخصة **GNU Affero General Public License v3.0 (AGPL-3.0)**.
+
+- يمكنك استخدام ونسخ وتوزيع البرنامج
+- يمكنك تعديله وتحسينه
+- يجب أن تكون جميع التعديلات مفتوحة المصدر
+- يجب أن تحمل نفس الرخصة (AGPL-3.0)
+- يجب أن توفر المصدر لكل التغييرات
+
+**By contributing to this project, you agree that your contributions will be licensed under the same AGPL-3.0 license.**
+
+For more details, see the [LICENSE](LICENSE) file.
+
+---
+
 ## التواصل | Contact
 
-- **المشكلات:** [GitHub Issues](https://github.com/yourusername/Morshed-azkar/issues)
-- **المناقشات:** [GitHub Discussions](https://github.com/yourusername/Morshed-azkar/discussions)
+- **المشكلات:** [GitHub Issues](https://github.com/your969696/morshed-azkar/issues)
+- **المناقشات:** [GitHub Discussions](https://github.com/your969696/morshed-azkar/discussions)
 
 ---
 
