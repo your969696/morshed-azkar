@@ -4,16 +4,23 @@
 
 <div align="center">
 
-![Electron](https://img.shields.io/badge/Electron-43.1.1-blue?logo=electron)
-![React](https://img.shields.io/badge/React-19.2.7-61DAFB?logo=react)
-![Vite](https://img.shields.io/badge/Vite-8.1.0-646CFF?logo=vite)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.3.2-06B6D4?logo=tailwindcss)
-![License](https://img.shields.io/badge/License-AGPL--3.0-blue)
+![Electron](https://img.shields.io/badge/Electron-43.1.1-blue?logo=electron&logoColor=white)
+![React](https://img.shields.io/badge/React-19.2.7-61DAFB?logo=react&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-8.1.0-646CFF?logo=vite&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.3.2-06B6D4?logo=tailwindcss&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-ES2024-F7DF1E?logo=javascript&logoColor=black)
+![License](https://img.shields.io/badge/License-AGPL--3.0-green)
 ![Version](https://img.shields.io/badge/Version-1.0.0-orange)
+![PRs](https://img.shields.io/badge/PRs-Welcome-brightgreen)
+![Issues](https://img.shields.io/badge/Issues-Welcome-yellow)
 
 **تطبيق إسلامي شامل لسطح المكتب يحتوي على أذكار الصباح والمساء، أوقات الصلاة مع عداد تنازلي، القرآن الكريم، أدعية مسنونة، أسماء الله الحسنى، وإرشاد الحلال والحرام.**
 
 A comprehensive Islamic desktop application featuring morning and evening azkar, prayer times with countdown, Quran, duas, names of Allah, and Halal guide.
+
+[![Download](https://img.shields.io/badge/تحميل-التطبيق-blue)](https://github.com/your969696/morshed-azkar/releases)
+[![Documentation](https://img.shields.io/badge/توثيق-مفصل-green)](https://github.com/your969696/morshed-azkar#readme)
+[![Contributing](https://img.shields.io/badge/مساهمة-محمّل-orange)](https://github.com/your969696/morshed-azkar/blob/main/CONTRIBUTING.md)
 
 </div>
 
@@ -93,7 +100,7 @@ A comprehensive Islamic desktop application featuring morning and evening azkar,
 ## هيكل المشروع | Project Structure
 
 ```
-Morshed-azkar/
+morshed-azkar/
 │
 ├── electron/                    # ملفات Electron (الخادم المحلي)
 │   ├── main.cjs                 # ملف التشغيل الرئيسي للتطبيق
@@ -345,8 +352,8 @@ Morshed-azkar/
 
 ```bash
 # 1. استنساخ المشروع
-git clone https://github.com/yourusername/Morshed-azkar.git
-cd Morshed-azkar
+git clone https://github.com/your969696/morshed-azkar.git
+cd morshed-azkar
 
 # 2. تثبيت التبعيات
 npm install
@@ -411,7 +418,7 @@ export const morningAzkar = [
 
 ### تحويل الصوتيات | Audio Porting
 
-ملفات الصوتيات في `public/` بتنسيق MP3/M4A可以直接 نسخها:
+ملفات الصوتيات في `public/` بتنسيق MP3/M4A يمكن نسخها مباشرة:
 ```
 public/adhan1.mp3          → assets/sounds/adhan1.mp3
 public/adhan2.mp3          → assets/sounds/adhan2.mp3
@@ -481,7 +488,8 @@ git push origin feature/اسم-الميزة
 
 This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.
 
-这意味着：
+### ماذا تعني هذه الرخصة؟ | What does this license mean?
+
 - يمكنك استخدام ونسخ وتوزيع البرنامج
 - يمكنك تعديله وتحسينه
 - يجب أن تكون جميع التعديلات مفتوحة المصدر
@@ -521,6 +529,3 @@ For more details, see the [LICENSE](LICENSE) file or visit https://www.gnu.org/l
 بسم الله الرحمن الرحيم
 
 </div>
-
-
-

@@ -17,7 +17,7 @@ A clear and description of the bug.
 1. افتح التطبيق
 2. اذهب إلى '...'
 3. اضغط على '...'
-4. видите الخطأ
+4. ترى الخطأ
 
 ## السلوك المتوقع | Expected Behavior
 
