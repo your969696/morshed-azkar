@@ -1,0 +1,434 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.11 87bfad18",
+  "osm3s": {
+    "timestamp_osm_base": "2026-07-30T03:50:06Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+{
+  "type": "way",
+  "id": 412475901,
+  "center": {
+    "lat": 34.0185669,
+    "lon": -118.2924402
+  },
+  "nodes": [
+    4138942222,
+    4138942221,
+    869580030,
+    4138941451,
+    4138941613,
+    4138941616,
+    4138942222
+  ],
+  "tags": {
+    "alt_name": "Daw Center of Masjid Umar",
+    "amenity": "place_of_worship",
+    "building": "mosque",
+    "building:units": "1",
+    "ele": "69.2",
+    "height": "15.7",
+    "lacounty:ain": "5040033029",
+    "lacounty:bld_id": "473092829266",
+    "name": "Masjid Omar ibn Al-Khattab",
+    "religion": "muslim",
+    "start_date": "1993",
+    "wikidata": "Q136756958"
+  }
+},
+{
+  "type": "way",
+  "id": 420968977,
+  "center": {
+    "lat": 34.0686380,
+    "lon": -118.3069725
+  },
+  "nodes": [
+    4208358262,
+    11778057631,
+    11778057627,
+    4208358210,
+    4208358221,
+    4208358249,
+    4208358248,
+    4208358261,
+    4208358262
+  ],
+  "tags": {
+    "addr:housenumber": "309",
+    "addr:postcode": "90020",
+    "addr:state": "CA",
+    "addr:street": "South Serrano Avenue",
+    "amenity": "place_of_worship",
+    "building": "mosque",
+    "building:levels": "2",
+    "building:units": "1",
+    "denomination": "sunni",
+    "ele": "80.9",
+    "height": "9.9",
+    "lacounty:ain": "5503004013",
+    "lacounty:bld_id": "468703847502",
+    "name": "Masjid Al-Falah",
+    "religion": "muslim",
+    "start_date": "1916"
+  }
+},
+{
+  "type": "way",
+  "id": 431416813,
+  "center": {
+    "lat": 34.1862886,
+    "lon": -118.5297164
+  },
+  "nodes": [
+    4306168119,
+    4306168124,
+    4306168323,
+    4306168336,
+    4306168345,
+    4306168353,
+    4306168356,
+    4306168344,
+    4306168368,
+    4306168361,
+    4306168367,
+    4306168346,
+    4306168366,
+    4306168332,
+    4306168320,
+    4306168185,
+    4306168179,
+    4306168159,
+    4306168137,
+    4306168134,
+    4306168126,
+    4306168117,
+    4306168095,
+    4306167987,
+    4306167917,
+    4306167901,
+    4306166668,
+    4306166662,
+    4306167677,
+    4306167793,
+    4306167680,
+    4306167805,
+    4306167814,
+    4306166651,
+    4306167791,
+    4306167807,
+    4306167789,
+    4306167685,
+    4306167682,
+    4306167681,
+    4306167688,
+    4306167799,
+    4306167806,
+    4306166653,
+    4306166659,
+    4306166685,
+    4306167898,
+    4306167924,
+    4306167932,
+    4306167958,
+    4306167974,
+    4306168119
+  ],
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "mosque",
+    "building:units": "1",
+    "ele": "233.9",
+    "height": "9.0",
+    "lacounty:ain": "8625041007",
+    "lacounty:bld_id": "2014113125880000",
+    "name": "Islamic Center of Reseda",
+    "religion": "muslim",
+    "start_date": "2013",
+    "website": "https://islamiccenterofreseda.com/",
+    "wikidata": "Q138748893",
+    "wikimedia_commons": "File:Islamic Center of Reseda, November 2025.jpg"
+  }
+},
+{
+  "type": "way",
+  "id": 439268113,
+  "center": {
+    "lat": 34.0115148,
+    "lon": -118.4102017
+  },
+  "nodes": [
+    4368983809,
+    4368983847,
+    4368983870,
+    4368983875,
+    4368983876,
+    4368983881,
+    4368983888,
+    4368983994,
+    4368983992,
+    4368983983,
+    4368983987,
+    4368983991,
+    4368983989,
+    4368983984,
+    4368983979,
+    4368983972,
+    4368983966,
+    4368983939,
+    4368983916,
+    4368983889,
+    4368983874,
+    4368983865,
+    4368983858,
+    4368983849,
+    4368983839,
+    4368983836,
+    4368983835,
+    4368983834,
+    4368983822,
+    4368983818,
+    4368983792,
+    4368983786,
+    4368983809
+  ],
+  "tags": {
+    "building": "mosque",
+    "ele": "30.5",
+    "height": "12.2",
+    "lacounty:ain": "4208025035",
+    "lacounty:bld_id": "437365826799",
+    "start_date": "2000"
+  }
+},
+{
+  "type": "way",
+  "id": 449976625,
+  "center": {
+    "lat": 33.9174639,
+    "lon": -118.0283588
+  },
+  "nodes": [
+    4468934616,
+    4468933669,
+    4468933668,
+    4468934547,
+    4468934546,
+    12856600403,
+    4468934615,
+    12856600415,
+    4468934616
+  ],
+  "tags": {
+    "addr:city": "La Mirada",
+    "addr:housenumber": "14225",
+    "addr:postcode": "90638",
+    "addr:state": "CA",
+    "addr:street": "Imperial Highway",
+    "amenity": "place_of_worship",
+    "building": "mosque",
+    "building:units": "1",
+    "ele": "43.9",
+    "height": "5.7",
+    "lacounty:ain": "8031021042",
+    "lacounty:bld_id": "553066792370",
+    "name": "La Mirada Masjid",
+    "religion": "muslim",
+    "start_date": "1981",
+    "website": "http://www.masjidlamirada.org/"
+  }
+},
+{
+  "type": "way",
+  "id": 449978240,
+  "center": {
+    "lat": 33.9490006,
+    "lon": -118.1470618
+  },
+  "nodes": [
+    358855883,
+    4468955190,
+    4468955184,
+    4468955197,
+    4468955203,
+    4468955262,
+    4468955252,
+    4468955271,
+    4468955279,
+    4468955373,
+    4468955353,
+    4468955410,
+    4468955451,
+    4468955456,
+    4468955508,
+    4468955501,
+    4468955546,
+    4468955550,
+    4468955579,
+    4468955577,
+    4468955592,
+    4468955545,
+    4468955485,
+    4468955349,
+    4468955356,
+    4468955329,
+    4468955325,
+    4468955308,
+    358855883
+  ],
+  "tags": {
+    "addr:city": "Downey",
+    "addr:housenumber": "11022",
+    "addr:postcode": "90241",
+    "addr:state": "CA",
+    "addr:street": "Old River School Road",
+    "amenity": "place_of_worship",
+    "building": "mosque",
+    "ele": "41.4;35",
+    "email": "info@isodla.org",
+    "gnis:feature_id": "2095901",
+    "height": "6.2",
+    "lacounty:ain": "6249025014",
+    "lacounty:bld_id": "517062803848",
+    "name": "Islamic Society of Downey",
+    "religion": "muslim",
+    "start_date": "1944"
+  }
+},
+{
+  "type": "way",
+  "id": 450812084,
+  "center": {
+    "lat": 33.9179780,
+    "lon": -118.1186732
+  },
+  "nodes": [
+    4477180488,
+    4477180481,
+    4477180480,
+    4477180487,
+    4477180486,
+    4477180514,
+    4477180516,
+    4477180489,
+    4477180488
+  ],
+  "tags": {
+    "addr:city": "Downey",
+    "addr:housenumber": "12428",
+    "addr:postcode": "90242",
+    "addr:state": "CA",
+    "addr:street": "Benedict Avenue",
+    "amenity": "place_of_worship",
+    "building": "mosque",
+    "ele": "37.9",
+    "email": "info@downeymasjid.com",
+    "height": "8.0",
+    "lacounty:ain": "6283016011",
+    "lacounty:bld_id": "525649792555",
+    "name": "Islamic Center of Midcities",
+    "phone": "+1-562-583-9670",
+    "religion": "muslim",
+    "start_date": "2008",
+    "website": "https://downeymasjid.com/"
+  }
+},
+{
+  "type": "way",
+  "id": 550408108,
+  "center": {
+    "lat": 33.7512827,
+    "lon": -118.0064907
+  },
+  "nodes": [
+    5316210784,
+    5316210785,
+    5316210786,
+    5316210787,
+    5316210784
+  ],
+  "tags": {
+    "addr:city": "Westminster",
+    "addr:housenumber": "14522",
+    "addr:postcode": "92683",
+    "addr:state": "CA",
+    "addr:street": "Goldenwest Street",
+    "alt_name": "Al-Noor Mosque",
+    "amenity": "place_of_worship",
+    "building": "mosque",
+    "denomination": "sunni",
+    "name": "Al-Noor Foundation",
+    "name:fa": "بنیاد النور",
+    "religion": "muslim"
+  }
+},
+{
+  "type": "way",
+  "id": 1062187399,
+  "center": {
+    "lat": 33.8056180,
+    "lon": -117.9595158
+  },
+  "nodes": [
+    9758202321,
+    9758202318,
+    9758202328,
+    9758202324,
+    9758202321
+  ],
+  "tags": {
+    "addr:city": "Anaheim",
+    "addr:housenumber": "1717",
+    "addr:postcode": "92804",
+    "addr:state": "CA",
+    "addr:street": "Brookhurst Street",
+    "amenity": "place_of_worship",
+    "building": "mosque",
+    "email": "office@wcismasjid.com",
+    "height": "7.01",
+    "name": "Masjid Al-Ansar",
+    "phone": "+1-714-535-1100",
+    "religion": "muslim",
+    "source": "esri/Orange_County_CA_Buildings_v2;local knowledge",
+    "website": "https://www.wcismasjid.com/"
+  }
+},
+{
+  "type": "way",
+  "id": 1105623390,
+  "center": {
+    "lat": 34.0109388,
+    "lon": -118.2562303
+  },
+  "nodes": [
+    10117355720,
+    10117355721,
+    10117355722,
+    10117355723,
+    10117355724,
+    10117355725,
+    10117355726,
+    10117355727,
+    10117355728,
+    10117355729,
+    10117355730,
+    10117355731,
+    10117355732,
+    10117355733,
+    10117355734,
+    10117355735,
+    10117355736,
+    10117355737,
+    10117355738,
+    10117355739,
+    10117355720
+  ],
+  "tags": {
+    "building": "mosque"
+  }
+}
+
+  ]
+}

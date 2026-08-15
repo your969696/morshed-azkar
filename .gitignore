@@ -28,45 +28,5 @@ Desktop.ini
 tmp/
 temp/
 
-# Tools & Scripts (development only)
-tools/
-scripts/
-
-# Large media files - download separately
-public/adhan1.mp3
-public/adhan2.mp3
-public/after-adhan.mp3
-public/morning-azkar-voice.mp3
-public/evening-azkar-voice.mp3
-public/ramadan-cannon.mp3
-public/takbeer-eid.mp3
-public/azkar-chime.mp3
-public/*.m4a
-public/*.mp4
-public/*.webm
-
-# Voice directories - generate separately
-public/azkar-voices/
-public/names-voices/
-
-# Large data files
-public/data/hadith/
-public/data/tafsir.json
-public/salah-fajr/
-
-# Puzzle images
-public/puzzle-images/
-
-# Fonts
-public/fonts/
-
 # Logs
 *.log
-
-# Misc temp files
-t*.json
-temp-data.json
-test*.json
-PLAN-AZKAR-UPDATE.md
-onboarding-preview.html
-quiz-all-questions.txt
