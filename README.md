@@ -524,8 +524,4 @@ For more details, see the [LICENSE](LICENSE) file or visit https://www.gnu.org/l
 
 **May Allah accept from us and you good deeds**
 
----
-
-بسم الله الرحمن الرحيم
-
 </div>
