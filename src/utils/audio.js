@@ -3,6 +3,7 @@ let currentSource = null;
 let isPlaying = false;
 
 const RECITERS = [
+  { id: 'refaat', name: 'محمد رفعت', url: 'https://server14.mp3quran.net/refat/' },
   { id: 'mishary', name: 'مشاري العفاسي', url: 'https://server8.mp3quran.net/afs/' },
   { id: 'husary', name: 'محمود خليل الحصري', url: 'https://server10.mp3quran.net/husr/' },
   { id: 'minshawi', name: 'محمد صديق المنشاوي', url: 'https://server11.mp3quran.net/mjsj/' },
@@ -112,7 +113,7 @@ export function getIsPlaying() {
 
 export function getSurahAudioUrl(reciterId, surahNum) {
   const reciter = RECITERS.find(r => r.id === reciterId) || RECITERS[0];
-  const padded = padZero(surahNum);
+  const padded = surahNum.toString().padStart(3, '0');
   return `${reciter.url}${padded}.mp3`;
 }
 

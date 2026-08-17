@@ -111,6 +111,7 @@ export default function PrayerCountdown() {
   const wuduShownRef = useRef(false);
   const quranAutoPlayedRef = useRef(new Set());
   const fridayKahfRef = useRef(false);
+  const perPrayerQuranRef = useRef(new Set());
 
 
 
@@ -157,12 +158,15 @@ export default function PrayerCountdown() {
       setNextPrayer(next);
       setCountdown(formatCountdown(next.secondsLeft, t));
 
-      // ═══ PHASE 1: العداد (−60s → 0) ═══
-      const shouldShowCountdown = next.secondsLeft <= 60 && next.secondsLeft > 0;
+      // ═══ PHASE 1: العداد حسب مدة كل صلاة ═══
+      let perPrayerCd = 1;
+      try { perPrayerCd = JSON.parse(localStorage.getItem('perPrayerCountdown') || '{}')[next.key] || 1; } catch { perPrayerCd = 1; }
+      const countdownSec = perPrayerCd * 60;
+      const shouldShowCountdown = next.secondsLeft <= countdownSec && next.secondsLeft > 0;
       setShowCountdown(shouldShowCountdown);
 
-      // افتح نافذة العداد مرة واحدة عند −60 ثانية
-      if (next.secondsLeft <= 60 && next.secondsLeft > 0 && !countdownWindowShownRef.current) {
+      // افتح نافذة العداد مرة واحدة عند بداية العد
+      if (next.secondsLeft <= countdownSec && next.secondsLeft > 0 && !countdownWindowShownRef.current) {
         countdownWindowShownRef.current = true;
         const prayerTimeStr = next.time || allPrayers[next.key] || '--:--';
         const cleanT = prayerTimeStr.replace(/\s*\(.*?\)\s*/g, '').trim();
@@ -205,13 +209,21 @@ export default function PrayerCountdown() {
           localStorage.setItem(prayedKey, '1');
 
           const enabled = localStorage.getItem('adhanEnabled');
-          if (enabled !== 'false' && allowNotif) {
+          let perPrayerEnabled = true;
+          try { perPrayerEnabled = JSON.parse(localStorage.getItem('perPrayerAdhan') || '{}')[key] !== false; } catch { perPrayerEnabled = true; }
+          if (enabled !== 'false' && perPrayerEnabled && allowNotif) {
             // أغلق نافذة العداد أولاً
             countdownWindowShownRef.current = false;
             window.electronAPI?.hideCountdownWindow?.();
 
             // شغّل الأذان
-            window.dispatchEvent(new CustomEvent('prayerTimeArrived', { detail: { key, name: PRAYER_NAMES_AR[key] } }));
+            try {
+              const perVoice = JSON.parse(localStorage.getItem('perPrayerVoice') || '{}');
+              const perDua = JSON.parse(localStorage.getItem('perPrayerDua') || '{}');
+              window.dispatchEvent(new CustomEvent('prayerTimeArrived', { detail: { key, name: PRAYER_NAMES_AR[key], voice: perVoice[key] || 'makkah', dua: perDua[key] !== false } }));
+            } catch {
+              window.dispatchEvent(new CustomEvent('prayerTimeArrived', { detail: { key, name: PRAYER_NAMES_AR[key] } }));
+            }
             if (window.electronAPI?.showMainWindow) {
               window.electronAPI.showMainWindow();
             }
@@ -219,7 +231,7 @@ export default function PrayerCountdown() {
         }
       }
 
-      if (next.secondsLeft > 60) {
+      if (next.secondsLeft > countdownSec) {
         setAdhanPlayed(false);
       }
 
@@ -232,7 +244,7 @@ export default function PrayerCountdown() {
         setKhushuShown(false);
       }
 
-      if (next.secondsLeft <= 60 && next.secondsLeft > 0 && !wuduShownRef.current) {
+      if (next.secondsLeft <= countdownSec && next.secondsLeft > 0 && !wuduShownRef.current) {
         wuduShownRef.current = true;
         setWuduShown(true);
       }
@@ -240,6 +252,31 @@ export default function PrayerCountdown() {
         wuduShownRef.current = false;
         setWuduShown(false);
       }
+
+      // ═══ قراءة قرآن قبل كل صلاة ═══
+      try {
+        const perQuran = JSON.parse(localStorage.getItem('perPrayerQuran') || '{}');
+        const perQuranDur = JSON.parse(localStorage.getItem('perPrayerQuranDuration') || '{}');
+        const quranFiredKey = 'quranBeforePrayer_' + todayKey;
+        const quranFired = JSON.parse(localStorage.getItem(quranFiredKey) || '[]');
+        for (const pk of PRAYER_KEYS.filter(k => k !== 'Sunrise')) {
+          if (perQuran[pk] && times[pk] && !quranFired.includes(pk)) {
+            const parts = (times[pk] || '').split(':').map(Number);
+            if (parts.length === 2) {
+              const prayerSec = (parts[0] || 0) * 3600 + (parts[1] || 0) * 60;
+              const quranMins = perQuranDur[pk] || 15;
+              const quranStart = prayerSec - quranMins * 60;
+              if (nowSec >= quranStart && nowSec < prayerSec) {
+                quranFired.push(pk);
+                localStorage.setItem(quranFiredKey, JSON.stringify(quranFired));
+                if (allowNotif) {
+                  window.dispatchEvent(new CustomEvent('quranBeforePrayer', { detail: { key: pk, name: PRAYER_NAMES_AR[pk], duration: quranMins } }));
+                }
+              }
+            }
+          }
+        }
+      } catch {}
 
       const asrParts = (times.Asr || '').split(':').map(Number);
       const maghribParts = (times.Maghrib || '').split(':').map(Number);

@@ -10,6 +10,7 @@ import { behaviorInJoy, behaviorInGrief } from '../data/behavior-hadiths';
 import { bestDeeds } from '../data/best-deeds';
 import { playAzan, stopAzan, playRamadanCannon, speakArabic } from '../utils/sound';
 import { getRamadanIqamaSettings, setRamadanIqamaSettings, getTodaySurah, getQuranAudioUrl, playQuranAudio, stopQuranAudio } from '../utils/quran-audio';
+import { getSurahAudioUrl } from '../utils/audio';
 import ContactForm from '../components/ContactForm';
 
 const getDeletedIds = (key) => { try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch { return []; } };
@@ -105,6 +106,35 @@ export default function Settings() {
   const [offsets, setOffsets] = useState(() => getPrayerTimeOffsets());
   const [fiqhSchool, setFiqhSchool] = useState(() => getSchool());
 
+  const PRAYER_KEYS_UI = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+  const PRAYER_LABELS = { Fajr: 'الفجر', Dhuhr: 'الظهر', Asr: 'العصر', Maghrib: 'المغرب', Isha: 'العشاء' };
+  const PRAYER_ICONS = { Fajr: '🌅', Dhuhr: '☀️', Asr: '🌇', Maghrib: '🌙', Isha: '🌙' };
+
+  const [perPrayerAdhan, setPerPrayerAdhan] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('perPrayerAdhan') || '{}'); } catch { return {}; }
+  });
+  const [perPrayerCountdown, setPerPrayerCountdown] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('perPrayerCountdown') || '{}'); } catch { return {}; }
+  });
+  const [perPrayerVoice, setPerPrayerVoice] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('perPrayerVoice') || '{}'); } catch { return {}; }
+  });
+  const [perPrayerQuran, setPerPrayerQuran] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('perPrayerQuran') || '{}'); } catch { return {}; }
+  });
+  const [perPrayerQuranDuration, setPerPrayerQuranDuration] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('perPrayerQuranDuration') || '{}'); } catch { return {}; }
+  });
+  const [perPrayerQuranMode, setPerPrayerQuranMode] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('perPrayerQuranMode') || '{}'); } catch { return {}; }
+  });
+  const [perPrayerQuranSurah, setPerPrayerQuranSurah] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('perPrayerQuranSurah') || '{}'); } catch { return {}; }
+  });
+  const [perPrayerDua, setPerPrayerDua] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('perPrayerDua') || '{}'); } catch { return {}; }
+  });
+
   const [quranBeforeMaghrib, setQuranBeforeMaghrib] = useState(() => localStorage.getItem('quranBeforeMaghrib') !== 'false');
   const [quranBeforeMaghribMin, setQuranBeforeMaghribMin] = useState(() => parseInt(localStorage.getItem('quranBeforeMaghribMin') || '15'));
   const [quranAutoTimes, setQuranAutoTimes] = useState(() => {
@@ -155,6 +185,14 @@ export default function Settings() {
   useEffect(() => { localStorage.setItem('adhanEnabled', adhanEnabled.toString()); }, [adhanEnabled]);
   useEffect(() => { localStorage.setItem('adhanType', adhanType); }, [adhanType]);
   useEffect(() => { localStorage.setItem('adhanVolume', adhanVolume.toString()); }, [adhanVolume]);
+  useEffect(() => { localStorage.setItem('perPrayerAdhan', JSON.stringify(perPrayerAdhan)); }, [perPrayerAdhan]);
+  useEffect(() => { localStorage.setItem('perPrayerCountdown', JSON.stringify(perPrayerCountdown)); }, [perPrayerCountdown]);
+  useEffect(() => { localStorage.setItem('perPrayerVoice', JSON.stringify(perPrayerVoice)); }, [perPrayerVoice]);
+  useEffect(() => { localStorage.setItem('perPrayerQuran', JSON.stringify(perPrayerQuran)); }, [perPrayerQuran]);
+  useEffect(() => { localStorage.setItem('perPrayerQuranDuration', JSON.stringify(perPrayerQuranDuration)); }, [perPrayerQuranDuration]);
+  useEffect(() => { localStorage.setItem('perPrayerQuranMode', JSON.stringify(perPrayerQuranMode)); }, [perPrayerQuranMode]);
+  useEffect(() => { localStorage.setItem('perPrayerQuranSurah', JSON.stringify(perPrayerQuranSurah)); }, [perPrayerQuranSurah]);
+  useEffect(() => { localStorage.setItem('perPrayerDua', JSON.stringify(perPrayerDua)); }, [perPrayerDua]);
   useEffect(() => { localStorage.setItem('hourlyOverlayEnabled', hourlyEnabled.toString()); }, [hourlyEnabled]);
   useEffect(() => { localStorage.setItem('hourlyOverlayInterval', hourlyInterval.toString()); }, [hourlyInterval]);
   useEffect(() => { localStorage.setItem('hourlyOverlayAutoSpeak', hourlyAutoSpeak.toString()); }, [hourlyAutoSpeak]);
@@ -386,9 +424,9 @@ export default function Settings() {
             </div>
           </div>
 
-          {/* ═══ الصوت والإشعارات ═══ */}
+          {/* ═══ الصوت ═══ */}
           <div className="group">
-            <div className="group-label">🔔 {t.settings.groupSound || 'الصوت والإشعارات'}</div>
+            <div className="group-label">🔔 الصوت</div>
 
             {/* Sound & Vibration */}
             <div className="scard">
@@ -427,6 +465,11 @@ export default function Settings() {
                 </div>
               </div>
             </div>
+          </div>
+
+            {/* ═══ الأذان ═══ */}
+          <div className="group">
+            <div className="group-label">🕌 الأذان</div>
 
             {/* Adhan */}
             <div className="scard">
@@ -457,6 +500,193 @@ export default function Settings() {
                 </div>
               </div>
             </div>
+
+            {/* Per-Prayer Settings */}
+            <div className="scard">
+              <div className={`scard-header ${isOpen('perPrayer') ? 'open' : ''}`} onClick={() => toggle('perPrayer')}>
+                <div className="s-icon" style={{background:'rgba(0,200,150,.12)'}}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00c896" strokeWidth="2" strokeLinecap="round"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/><circle cx="12" cy="12" r="4"/></svg>
+                </div>
+                <div className="s-info"><div className="s-title">إعدادات كل صلاة</div><div className="s-sub">القرآن + العد + الأذان + الدعاء لكل صلاة</div></div>
+                <div className={`s-arrow ${isOpen('perPrayer') ? 'open' : ''}`} style={{marginRight:0}}>▼</div>
+              </div>
+              <div className={`panel ${isOpen('perPrayer') ? 'open' : ''}`}>
+                <div className="panel-inner">
+                  {PRAYER_KEYS_UI.map(key => (
+                    <div key={key} style={{marginBottom:20,padding:'16px 12px',borderRadius:12,background:'rgba(255,255,255,.03)',border:'1px solid rgba(255,255,255,.06)'}}>
+                      <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}>
+                        <span style={{fontSize:22}}>{PRAYER_ICONS[key]}</span>
+                        <span style={{fontSize:16,fontWeight:800,color:'#fff'}}>{PRAYER_LABELS[key]}</span>
+                      </div>
+
+                      {/* 1. قرآن قبل الصلاة */}
+                      <div className="row" style={{marginBottom:10}}>
+                        <div className="row-info">
+                          <div className="row-label" style={{fontSize:13}}>📖 قرآن قبل الصلاة</div>
+                          <div className="row-desc" style={{fontSize:11}}>تشغيل قرآن قبل موعد الصلاة</div>
+                        </div>
+                        <Toggle
+                          enabled={perPrayerQuran[key] === true}
+                          onToggle={() => setPerPrayerQuran(prev => ({...prev, [key]: !prev[key]}))}
+                        />
+                      </div>
+                      {perPrayerQuran[key] && (
+                        <>
+                          <div style={{marginBottom:10}}>
+                            <div className="row-label" style={{fontSize:12,color:'rgba(255,255,255,.4)',marginBottom:6}}>📤 طريقة القراءة</div>
+                            <div className="pill-group">
+                              <Pill active={(perPrayerQuranMode[key] || 'duration') === 'surah'} color="green" onClick={() => setPerPrayerQuranMode(prev => ({...prev, [key]: 'surah'}))}>
+                                سورة كاملة
+                              </Pill>
+                              <Pill active={(perPrayerQuranMode[key] || 'duration') === 'duration'} color="green" onClick={() => setPerPrayerQuranMode(prev => ({...prev, [key]: 'duration'}))}>
+                                بالوقت
+                              </Pill>
+                            </div>
+                          </div>
+                          {(perPrayerQuranMode[key] || 'duration') === 'duration' ? (
+                            <div style={{marginBottom:10}}>
+                              <div className="row-label" style={{fontSize:12,color:'rgba(255,255,255,.4)',marginBottom:6}}>⏱️ مدة القراءة</div>
+                              <div className="pill-group">
+                                {[5,10,15,20,30].map(m => (
+                                  <Pill key={m} active={(perPrayerQuranDuration[key] || 15) === m} color="green" onClick={() => setPerPrayerQuranDuration(prev => ({...prev, [key]: m}))}>
+                                    {m} د
+                                  </Pill>
+                                ))}
+                              </div>
+                            </div>
+                          ) : (
+                            <div style={{marginBottom:10}}>
+                              <div className="row-label" style={{fontSize:12,color:'rgba(255,255,255,.4)',marginBottom:6}}>🤲 اختر السورة</div>
+                              <div className="pill-group" style={{flexWrap:'wrap'}}>
+                                {[{n:36,l:'يس'},{n:55,l:'الرحمن'},{n:67,l:'الملك'},{n:56,l:'الواقعة'},{n:18,l:'الكهف'},{n:19,l:'مريم'},{n:44,l:'الدخان'},{n:32,l:'السجدة'},{n:38,l:'ص'},{n:43,l:'الزخرف'},{n:2,l:'البقرة'},{n:78,l:'النبأ'},{n:89,l:'الفجر'},{n:108,l:'الكوثر'},{n:109,l:'الكافرون'},{n:112,l:'الإخلاص'},{n:113,l:'الفلق'},{n:114,l:'الناس'}].map(s => (
+                                  <Pill key={s.n} active={(perPrayerQuranSurah[key] || 36) === s.n} color="green" onClick={() => setPerPrayerQuranSurah(prev => ({...prev, [key]: s.n}))}>
+                                    {s.l}
+                                  </Pill>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      )}
+
+                      <div className="divider" style={{margin:'10px 0'}}/>
+
+                      {/* 2. العد التنازلي */}
+                      <div style={{marginBottom:10}}>
+                        <div className="row-label" style={{fontSize:13,fontWeight:700,color:'#fff',marginBottom:6}}>⏳ العد التنازلي</div>
+                        <div className="pill-group">
+                          {[1,2,3,4,5].map(m => (
+                            <Pill
+                              key={m}
+                              active={(perPrayerCountdown[key] || 1) === m}
+                              color="green"
+                              onClick={() => setPerPrayerCountdown(prev => ({...prev, [key]: m}))}
+                            >
+                              {m} {m === 1 ? 'دقيقة' : 'دقائق'}
+                            </Pill>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="divider" style={{margin:'10px 0'}}/>
+
+                      {/* 3. صوت الأذان */}
+                      <div className="row" style={{marginBottom:10}}>
+                        <div className="row-info">
+                          <div className="row-label" style={{fontSize:13}}>🔊 الأذان</div>
+                          <div className="row-desc" style={{fontSize:11}}>تشغيل أو إيقاف أذان هذه الصلاة</div>
+                        </div>
+                        <Toggle
+                          enabled={perPrayerAdhan[key] !== false}
+                          onToggle={() => setPerPrayerAdhan(prev => ({...prev, [key]: prev[key] === false ? true : false}))}
+                        />
+                      </div>
+                      {perPrayerAdhan[key] !== false && (
+                        <div style={{marginBottom:10}}>
+                          <div className="row-label" style={{fontSize:12,color:'rgba(255,255,255,.4)',marginBottom:6}}>🎤 صوت المؤذن</div>
+                          <div className="pill-group">
+                            {[{v:'makkah',l:'المكي'},{v:'madinah',l:'المدني'},{v:'egyptian',l:'مصري'},{v:'abdelbaset',l:'عبد الباسط'}].map(o => (
+                              <Pill key={o.v} active={(perPrayerVoice[key] || 'makkah') === o.v} color="gold" onClick={() => setPerPrayerVoice(prev => ({...prev, [key]: o.v}))}>
+                                {o.l}
+                              </Pill>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="divider" style={{margin:'10px 0'}}/>
+
+                      {/* 4. الدعاء بعد الأذان */}
+                      <div className="row" style={{marginBottom:10}}>
+                        <div className="row-info">
+                          <div className="row-label" style={{fontSize:13}}>🤲 الدعاء بعد الأذان</div>
+                          <div className="row-desc" style={{fontSize:11}}>تشغيل دعاء بعد انتهاء الأذان</div>
+                        </div>
+                        <Toggle
+                          enabled={perPrayerDua[key] !== false}
+                          onToggle={() => setPerPrayerDua(prev => ({...prev, [key]: prev[key] === false ? true : false}))}
+                        />
+                      </div>
+
+                      <div className="divider" style={{margin:'10px 0'}}/>
+
+                      {/* 5. أزرار الاختبار */}
+                      <div style={{display:'flex',gap:8}}>
+                        <button onClick={(e) => {
+                          e.stopPropagation();
+                          stopAzan();
+                          stopQuranAudio();
+                          const v = perPrayerVoice[key] || 'makkah';
+                          playAzan(null, v);
+                        }} style={{flex:1,padding:'10px 8px',borderRadius:8,background:'rgba(240,176,64,.1)',border:'1px solid rgba(240,176,64,.2)',color:'#f0b040',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>
+                          🔊 اختبار الصوت
+                        </button>
+                        <button onClick={(e) => {
+                          e.stopPropagation();
+                          stopAzan();
+                          stopQuranAudio();
+                          const voice = perPrayerVoice[key] || 'makkah';
+                          const duaEnabled = perPrayerDua[key] !== false;
+                          const quranOn = perPrayerQuran[key] === true;
+                          const qm = perPrayerQuranMode[key] || 'duration';
+                          const qSurah = perPrayerQuranSurah[key] || 36;
+
+                          const onAdhan = () => {
+                            playAzan(() => {
+                              if (duaEnabled) {
+                                const duaAudio = new Audio('after-adhan.mp3');
+                                duaAudio.preload = 'auto';
+                                duaAudio.volume = 1;
+                                duaAudio.play().catch(() => {});
+                              }
+                            }, voice);
+                          };
+
+                          if (quranOn) {
+                            const surahId = qm === 'surah' ? qSurah : [36,55,67,56,18][Math.floor(Math.random()*5)];
+                            const url = getSurahAudioUrl('refaat', surahId);
+                            const audio = new Audio(url);
+                            audio.volume = 1;
+                            audio.onended = () => onAdhan();
+                            audio.onerror = () => onAdhan();
+                            audio.play().catch(() => onAdhan());
+                          } else {
+                            onAdhan();
+                          }
+                        }} style={{flex:1,padding:'10px 8px',borderRadius:8,background:'rgba(0,200,150,.1)',border:'1px solid rgba(0,200,150,.2)',color:'#00c896',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>
+                          🧪 اختبار السلسلة
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ═══ التنبيهات ═══ */}
+          <div className="group">
+            <div className="group-label">⏰ التنبيهات</div>
 
             {/* Hourly Reminders */}
             <div className="scard">
@@ -605,9 +835,9 @@ export default function Settings() {
             </div>
           </div>
 
-          {/* ═══ الموقع وأوقات الصلاة ═══ */}
+          {/* ═══ الموقع والصلاة والقرآن ═══ */}
           <div className="group">
-            <div className="group-label">📍 {t.settings.groupLocation || 'الموقع وأوقات الصلاة'}</div>
+            <div className="group-label">🕌 الصلاة والقرآن</div>
 
             {/* Location */}
             <div className="scard">
@@ -787,11 +1017,8 @@ export default function Settings() {
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* ═══ القرآن قبل المغرب ═══ */}
-          <div className="group">
-            <div className="group-label">📖 القرآن قبل المغرب</div>
+            {/* ═══ القرآن ═══ */}
             <div className="scard">
               <div className="scard-header" onClick={() => {}}>
                 <div className="s-icon" style={{background: quranBeforeMaghrib ? 'rgba(0,200,150,.12)' : 'rgba(255,255,255,.06)'}}>
@@ -816,19 +1043,14 @@ export default function Settings() {
                       <option value={30}>30 دقيقة</option>
                     </select>
                   </div>
-                  <div style={{fontSize:10,color:'rgba(255,255,255,.4)',marginTop:6}}>القرآن يشتغل تلقائياً قبل المغرب ويقفل مع ظهور العداد (60 ثانية قبل الصلاة).</div>
                 </div>
               )}
             </div>
-          </div>
 
-          {/* ═══ أوقات القرآن المتعددة ═══ */}
-          <div className="group">
-            <div className="group-label">🕐 أوقات القرآن اليومية</div>
             <div className="scard">
               <div className="scard-header" onClick={() => {}}>
                 <div className="s-icon" style={{background:'rgba(0,200,150,.12)'}}>
-                  <span style={{fontSize:20}}>📖</span>
+                  <span style={{fontSize:20}}>🕐</span>
                 </div>
                 <div className="s-info">
                   <div className="s-title">أوقات تشغيل القرآن</div>
@@ -868,11 +1090,9 @@ export default function Settings() {
                   style={{width:'100%',padding:8,borderRadius:8,background:'rgba(0,200,150,.1)',border:'1px solid rgba(0,200,150,.2)',color:'#00c896',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>
                   + إضافة وقت
                 </button>
-                <div style={{fontSize:10,color:'rgba(255,255,255,.4)',marginTop:6}}>القرآن يشتغل في الأوقات المحددة ويقفل مع ظهور العداد. السور القصيرة تكمل في السورة التالية.</div>
               </div>
             </div>
 
-            {/* سورة الكهف يوم الجمعة */}
             <div className="scard">
               <div className="scard-header" onClick={() => {}}>
                 <div className="s-icon" style={{background: quranFridayKahf ? 'rgba(255,215,0,.12)' : 'rgba(255,255,255,.06)'}}>
@@ -891,7 +1111,6 @@ export default function Settings() {
                     <input type="time" value={quranFridayKahfTime} onChange={(e) => setQuranFridayKahfTime(e.target.value)}
                       style={{flex:1,padding:'6px 10px',borderRadius:8,border:'1px solid var(--border-card)',background:'var(--bg-primary)',color:'#fff',fontSize:13,colorScheme:'dark'}} />
                   </div>
-                  <div style={{fontSize:10,color:'rgba(255,255,255,.4)',marginTop:6}}>يشتغل من الوقت المحدد لحد المغرب. السورة تكمل حتى نهايتها.</div>
                 </div>
               )}
             </div>
@@ -899,7 +1118,7 @@ export default function Settings() {
 
           {/* ═══ التخصيص المتقدم ═══ */}
           <div className="group">
-            <div className="group-label">⚡ {t.settings.groupAdvanced || 'التخصيص المتقدم'}</div>
+            <div className="group-label">⚡ إعدادات متقدمة</div>
 
             {/* Names of Allah Audio */}
             <div className="scard">
@@ -981,11 +1200,13 @@ export default function Settings() {
                 </div>
               </div>
             </div>
+
+
           </div>
 
           {/* ═══ إدارة المحتوى ═══ */}
           <div className="group">
-            <div className="group-label">🗑️ إدارة المحتوى</div>
+            <div className="group-label">📿 الأذكار</div>
 
             {/* Names of Allah */}
             <div className="scard">
@@ -1562,86 +1783,14 @@ export default function Settings() {
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* ═══ الاختبار والتشخيص ═══ */}
-          <div className="group">
-            <div className="group-label">🧪 {t.settings.groupTest || 'الاختبار والتشخيص'}</div>
-            <div className="scard">
-              <div className={`scard-header ${isOpen('test') ? 'open' : ''}`} onClick={() => toggle('test')}>
-                <div className="s-icon" style={{background:'rgba(245,158,11,.12)'}}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v11m0 0H5m4 0h10m-10 0v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-5m-10 0H5"/></svg>
-                </div>
-                <div className="s-info"><div className="s-title">{t.settings.testNotifications}</div><div className="s-sub">{t.settings.testNotificationsDesc}</div></div>
-                <div className={`s-arrow ${isOpen('test') ? 'open' : ''}`}>▼</div>
-              </div>
-              <div className={`panel ${isOpen('test') ? 'open' : ''}`}>
-                <div className="panel-inner">
-                  <div className="test-grid">
-                    <button className="test-btn" style={{background:'rgba(240,176,64,.08)',borderColor:'rgba(240,176,64,.2)',color:'#f0b040'}} onClick={() => window.dispatchEvent(new CustomEvent('namesOfAllahTime'))}>📿 {t.settings.testNames?.replace('اختبار ','') || 'الأسماء'}</button>
-                    <button className="test-btn" style={{background:'rgba(0,200,150,.08)',borderColor:'rgba(0,200,150,.2)',color:'#00c896'}} onClick={() => window.dispatchEvent(new CustomEvent('prayerTimeArrived', {detail:{name:'المغرب'}}))}>🕌 {t.settings.testAzan?.replace('اختبار ','') || 'الأذان'}</button>
-
-                    <button className="test-btn" style={{background:'rgba(236,72,153,.08)',borderColor:'rgba(236,72,153,.2)',color:'#f472b6'}} onClick={() => window.dispatchEvent(new CustomEvent('takbeerTime'))}>🎉 {t.settings.testTakbeer?.replace('اختبار ','') || 'التكبير'}</button>
-                    <button className="test-btn" style={{background:'rgba(0,150,200,.08)',borderColor:'rgba(0,150,200,.2)',color:'#0096c8'}} onClick={() => window.dispatchEvent(new CustomEvent('hourlyDhikrTest'))}>📿 ذكر</button>
-                    <button className="test-btn" style={{background:'rgba(20,184,166,.08)',borderColor:'rgba(20,184,166,.2)',color:'#2dd4bf'}} onClick={() => window.dispatchEvent(new CustomEvent('quranBeforeMaghrib'))}>📖 {t.settings.testQuran?.replace('اختبار ','') || 'القرآن'}</button>
-                    <button className="test-btn" style={{background:'rgba(16,185,129,.08)',borderColor:'rgba(16,185,129,.2)',color:'#10b981'}} onClick={() => window.dispatchEvent(new CustomEvent('quranAutoPlay', {detail:{surah:'random',duration:5}}))}>📖 تشغيل تلقائي</button>
-                    <button className="test-btn" style={{background:'rgba(249,115,22,.08)',borderColor:'rgba(249,115,22,.2)',color:'#fb923c'}} onClick={() => window.dispatchEvent(new CustomEvent('mesaharatiTime'))}>🥁 {t.settings.testMesaharati?.replace('اختبار ','') || 'السحور'}</button>
-                    <button className="test-btn" style={{background:'rgba(99,102,241,.08)',borderColor:'rgba(99,102,241,.2)',color:'#818cf8'}} onClick={() => window.dispatchEvent(new CustomEvent('qiyamTime', {detail:{time:'02:00'}}))}>🌙 قيام الليل</button>
-                    <button className="test-btn" style={{background:'rgba(239,68,68,.08)',borderColor:'rgba(239,68,68,.2)',color:'#ef4444'}} onClick={() => {
-                      playRamadanCannon(() => {
-                        window.dispatchEvent(new CustomEvent('prayerTimeArrived', { detail: { name: 'المغرب' } }));
-                      });
-                    }}>💥 المدفع</button>
-                  </div>
-                  <div style={{marginTop:10}}>
-                    <button className="test-btn" style={{width:'100%',background:'rgba(139,92,246,.08)',borderColor:'rgba(139,92,246,.2)',color:'#a78bfa',justifyContent:'center'}} onClick={() => {
-                      stopAzan();
-                      playAzan(() => {
-                        const duaAudio = new Audio('after-adhan.mp3');
-                        duaAudio.preload = 'auto';
-                        duaAudio.volume = 1;
-                        duaAudio.play().catch(() => {});
-                      });
-                    }}>🕌 استماع الأذان + الدعاء بعد الأذان</button>
-                  </div>
-                  <div style={{fontSize:11,color:'rgba(255,255,255,.3)',fontWeight:700,margin:'12px 0 6px'}}>تنبيهات رمضان</div>
-                  <div className="test-grid">
-                    <button className="test-btn" style={{background:'rgba(240,176,64,.08)',borderColor:'rgba(240,176,64,.2)',color:'#f0b040'}} onClick={() => window.dispatchEvent(new CustomEvent('ramadanSuhoorTime'))}>🌅 السحور</button>
-                    <button className="test-btn" style={{background:'rgba(139,92,246,.08)',borderColor:'rgba(139,92,246,.2)',color:'#a78bfa'}} onClick={() => window.dispatchEvent(new CustomEvent('ramadanImsakTime'))}>🕋 الإمساك</button>
-                    <button className="test-btn" style={{background:'rgba(249,115,22,.08)',borderColor:'rgba(249,115,22,.2)',color:'#fb923c'}} onClick={() => window.dispatchEvent(new CustomEvent('ramadanIftarSunanTime'))}>🌤️ سنن الإفطار</button>
-                    <button className="test-btn" style={{background:'rgba(236,72,153,.08)',borderColor:'rgba(236,72,153,.2)',color:'#f472b6'}} onClick={() => window.dispatchEvent(new CustomEvent('ramadanQiyamTime'))}>🌙 قيام رمضان</button>
-                    <button className="test-btn" style={{background:'rgba(239,68,68,.08)',borderColor:'rgba(239,68,68,.2)',color:'#ef4444'}} onClick={() => {
-                      playRamadanCannon(() => {
-                        window.dispatchEvent(new CustomEvent('prayerTimeArrived', { detail: { name: 'المغرب' } }));
-                      });
-                    }}>💥 مدفأة رمضان</button>
-                  </div>
-                  <div style={{fontSize:11,color:'rgba(255,255,255,.3)',fontWeight:700,margin:'12px 0 6px'}}>تلاوة قبل المغرب</div>
-                  <div className="test-grid">
-                    <button className="test-btn" style={{background:'rgba(240,176,64,.08)',borderColor:'rgba(240,176,64,.2)',color:'#f0b040'}} onClick={() => {
-                      const url = 'https://server14.mp3quran.net/refat/018.mp3';
-                      stopQuranAudio(); playQuranAudio(url, { volume: 0.8 });
-                    }}>📖 الكهف — محمد رفعت</button>
-                    <button className="test-btn" style={{background:'rgba(59,130,246,.08)',borderColor:'rgba(59,130,246,.2)',color:'#60a5fa'}} onClick={() => {
-                      const url = 'https://server14.mp3quran.net/refat/055.mp3';
-                      stopQuranAudio(); playQuranAudio(url, { volume: 0.8 });
-                    }}>📖 الرحمن — محمد رفعت</button>
-                    <button className="test-btn" style={{background:'rgba(239,68,68,.08)',borderColor:'rgba(239,68,68,.2)',color:'#ef4444'}} onClick={() => { stopQuranAudio(); }}>⏹️ إيقاف الصوت</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ═══ المدفع ═══ */}
-          <div className="group">
-            <div className="group-label">💥 المدفع</div>
+            {/* المدفع */}
             <div className="scard">
               <div className={`scard-header ${isOpen('cannon') ? 'open' : ''}`} onClick={() => toggle('cannon')}>
                 <div className="s-icon" style={{background:'rgba(239,68,68,.12)'}}>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>
                 </div>
-                <div className="s-info"><div className="s-title">تشغيل المدفع قبل المغرب</div><div className="s-sub">كل اثنين وخميس + رمضان</div></div>
+                <div className="s-info"><div className="s-title">المدفع</div><div className="s-sub">تشغيل المدفع قبل المغرب — كل اثنين وخميس + رمضان</div></div>
                 <Toggle enabled={cannonEnabled} onToggle={(e) => { e.stopPropagation(); setCannonEnabled(!cannonEnabled); }} />
                 <div className={`s-arrow ${isOpen('cannon') ? 'open' : ''}`} style={{marginRight:0}}>▼</div>
               </div>
@@ -1650,19 +1799,13 @@ export default function Settings() {
                   <div className="row">
                     <div className="row-info">
                       <div className="row-label">التشغيل التلقائي</div>
-                      <div className="row-sub">يشتغل 5 ثانية قبل المغرب في:</div>
+                      <div className="row-sub">يشتغل 5 ثانية قبل المغرب</div>
                     </div>
                   </div>
                   <div style={{display:'flex',gap:8,marginTop:8,flexWrap:'wrap'}}>
                     <div style={{padding:'6px 12px',borderRadius:8,background:cannonEnabled?'rgba(239,68,68,.12)':'rgba(255,255,255,.04)',border:'1px solid '+(cannonEnabled?'rgba(239,68,68,.3)':'rgba(255,255,255,.08)'),color:cannonEnabled?'#ef4444':'rgba(255,255,255,.4)',fontSize:11,fontWeight:700}}>🌙 كل أيام رمضان</div>
                     <div style={{padding:'6px 12px',borderRadius:8,background:cannonEnabled?'rgba(239,68,68,.12)':'rgba(255,255,255,.04)',border:'1px solid '+(cannonEnabled?'rgba(239,68,68,.3)':'rgba(255,255,255,.08)'),color:cannonEnabled?'#ef4444':'rgba(255,255,255,.4)',fontSize:11,fontWeight:700}}>📅 كل اثنين وخميس</div>
                   </div>
-                  <div className="divider" style={{margin:'12px 0'}}/>
-                  <button className="test-btn" style={{width:'100%',justifyContent:'center',background:'rgba(239,68,68,.08)',borderColor:'rgba(239,68,68,.2)',color:'#ef4444'}} onClick={() => {
-                    playRamadanCannon(() => {
-                      window.dispatchEvent(new CustomEvent('prayerTimeArrived', { detail: { name: 'المغرب' } }));
-                    });
-                  }}>💥 اختبار المدفع الآن</button>
                 </div>
               </div>
             </div>

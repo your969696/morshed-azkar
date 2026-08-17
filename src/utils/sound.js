@@ -56,7 +56,7 @@ export function getAdhanAudio() {
   return adhanAudio;
 }
 
-export async function playAzan(onEnd) {
+export async function playAzan(onEnd, voice) {
   try {
     if (adhanAudio && !adhanAudio.paused && !adhanAudio.ended) {
       return;
@@ -75,7 +75,18 @@ export async function playAzan(onEnd) {
       stopAudio();
     } catch {}
     adhanIdx = (adhanIdx + 1) % 2;
-    const fileName = adhanIdx === 0 ? 'adhan1.mp3' : 'adhan2.mp3';
+
+    let fileName;
+    const perPrayerVoiceStr = localStorage.getItem('perPrayerVoice');
+    if (voice) {
+      if (voice === 'makkah') fileName = 'adhan1.mp3';
+      else if (voice === 'madinah') fileName = 'adhan2.mp3';
+      else if (voice === 'egyptian') fileName = 'adhan1.mp3';
+      else if (voice === 'abdelbaset') fileName = 'adhan2.mp3';
+      else fileName = adhanIdx === 0 ? 'adhan1.mp3' : 'adhan2.mp3';
+    } else {
+      fileName = adhanIdx === 0 ? 'adhan1.mp3' : 'adhan2.mp3';
+    }
 
     let soundSrc = fileName;
     if (window.electronAPI?.getSoundPath) {

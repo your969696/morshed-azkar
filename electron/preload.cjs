@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('electronAPI', {
   getDataStats: () => ipcRenderer.invoke('get-data-stats'),
   generateTTS: (text, voice) => ipcRenderer.invoke('tts-generate', text, voice),
+  takeFullScreenshot: () => ipcRenderer.invoke('take-full-screenshot'),
   isElectron: true,
 
   // Reminder system (main process timers)

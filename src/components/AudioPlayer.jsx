@@ -6,7 +6,7 @@ import { useTranslation } from '../i18n.jsx';
 export default function AudioPlayer({ surahNum, surahName, reciterId: initialReciter, onClose }) {
   const { t } = useTranslation();
   const h = t.audioPlayer || {};
-  const [reciterId, setReciterId] = useState(initialReciter || 'mishary');
+  const [reciterId, setReciterId] = useState(initialReciter || 'refaat');
   const [playing, setPlaying] = useState(false);
   const [timeInfo, setTimeInfo] = useState({ currentTime: 0, duration: 0, formatted: '00:00', durationFormatted: '00:00', progress: 0 });
 

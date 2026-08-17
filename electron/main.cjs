@@ -3,6 +3,10 @@ const path = require('path');
 const fs = require('fs');
 const { execFile } = require('child_process');
 
+app.commandLine.appendSwitch('disable-renderer-backgrounding');
+app.commandLine.appendSwitch('disable-background-timer-throttling');
+app.commandLine.appendSwitch('disable-backgrounding-occluded-windows');
+
 const isDev = false;
 const DIST = path.join(__dirname, '..', 'dist');
 
@@ -24,7 +28,7 @@ function createWindow() {
     height: 600,
     minWidth: 500,
     minHeight: 400,
-    title: 'تطبيق الأذكار الإسلامية',
+    title: 'Morshed اذكار',
     icon: appIcon || undefined,
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
@@ -369,6 +373,13 @@ function checkFridayKahf() {
 
 setInterval(checkFridayKahf, 30000);
 
+// ===== Keep renderer alive when minimized =====
+setInterval(() => {
+  if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents) {
+    mainWindow.webContents.send('keepAlive');
+  }
+}, 10000);
+
 app.on('window-all-closed', () => {
   // Don't quit — keep running in system tray
 });
@@ -645,7 +656,11 @@ ipcMain.handle('get-sound-path', (_event, fileName) => {
   return path.join(__dirname, '..', 'dist', fileName);
 });
 
-ipcMain.handle('get-data-stats', () => {
+  ipcMain.handle('take-full-screenshot', async () => {
+    return await captureFullPage();
+  });
+
+  ipcMain.handle('get-data-stats', () => {
   const stats = { quran: 0, tafseer: 0, hadith: 0 };
   try {
     const quranDir = path.join(DIST, 'data', 'quran');
@@ -661,4 +676,92 @@ ipcMain.handle('get-data-stats', () => {
     }
   } catch {}
   return stats;
+});
+
+// ===== FULL PAGE SCREENSHOT =====
+const { globalShortcut } = require('electron');
+
+async function captureFullPage() {
+  try {
+    const originalBounds = mainWindow.getBounds();
+    const originalResizable = mainWindow.isResizable();
+
+    mainWindow.setResizable(true);
+
+    const dims = JSON.parse(await mainWindow.webContents.executeJavaScript(`
+      JSON.stringify({
+        pageHeight: Math.max(document.body.scrollHeight, document.documentElement.scrollHeight),
+        pageWidth: Math.max(document.body.scrollWidth, document.documentElement.scrollWidth),
+      })
+    `));
+
+    const { pageHeight, pageWidth } = dims;
+    console.log('Full page:', pageWidth, 'x', pageHeight);
+
+    await mainWindow.webContents.executeJavaScript(`
+      var __sc = document.querySelector('[data-scroll-container]');
+      if (__sc) {
+        __sc.__origOverflow = __sc.style.overflow;
+        __sc.__origHeight = __sc.style.height;
+        __sc.__origFlex = __sc.style.flex;
+        __sc.style.overflow = 'visible';
+        __sc.style.height = '${pageHeight}px';
+        __sc.style.flex = 'none';
+      }
+      window.scrollTo(0, 0);
+    `);
+
+    mainWindow.setSize(pageWidth, Math.max(pageHeight, 200), false);
+    await new Promise(r => setTimeout(r, 1500));
+
+    const img = await mainWindow.webContents.capturePage({ x: 0, y: 0, width: pageWidth, height: pageHeight });
+
+    await mainWindow.webContents.executeJavaScript(`
+      var __sc = document.querySelector('[data-scroll-container]');
+      if (__sc) {
+        __sc.style.overflow = __sc.__origOverflow || '';
+        __sc.style.height = __sc.__origHeight || '';
+        __sc.style.flex = __sc.__origFlex || '';
+      }
+      window.scrollTo(0, 0);
+    `);
+
+    mainWindow.setBounds(originalBounds);
+    mainWindow.setResizable(originalResizable);
+
+    const screenshotDir = path.join(app.getPath('desktop'), 'AzkarScreenshots');
+    if (!fs.existsSync(screenshotDir)) fs.mkdirSync(screenshotDir, { recursive: true });
+
+    const filename = `FullPage_${Date.now()}.png`;
+    const filePath = path.join(screenshotDir, filename);
+    fs.writeFileSync(filePath, img.toPNG());
+
+    new Notification({
+      title: 'تم حفظ الصورة الكاملة',
+      body: `${pageWidth}x${pageHeight}px - ${filename}`,
+      silent: true
+    }).show();
+
+    return filePath;
+  } catch (err) {
+    console.error('Screenshot error:', err);
+    new Notification({ title: 'خطأ', body: err.message }).show();
+    try {
+      const ob = mainWindow.getBounds();
+      mainWindow.setBounds(ob);
+    } catch {}
+    return null;
+  }
+}
+
+app.whenReady().then(() => {
+  globalShortcut.register('CommandOrControl+Shift+F12', async () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      await captureFullPage();
+    }
+  });
+});
+
+app.on('will-quit', () => {
+  globalShortcut.unregisterAll();
 });
