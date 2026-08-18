@@ -298,8 +298,7 @@ app.whenReady().then(() => {
   createTray();
   app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
 
-  // Ensure auto-start is OFF by default (user can enable from Settings)
-  try { app.setLoginItemSettings({ openAtLogin: false }); } catch {}
+  // Auto-start is controlled by user from Settings (get-auto-start / set-auto-start IPC)
 
   // Add Referer header for YouTube embeds (required since 2025)
   try {
