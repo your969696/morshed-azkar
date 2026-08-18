@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { speakArabic, stopSpeaking, playAzan, stopAzan, stopAllAudio, playMesaharati, stopMesaharati, playTakbeer, playRamadanTone, playRamadanCannon, stopRamadanCannon } from '../utils/sound';
-import { isRamadan } from '../utils/prayer-times';
+import { isRamadan, getPrayerTimesSync } from '../utils/prayer-times';
 import { useTranslation } from '../i18n.jsx';
 import { useNavigate } from 'react-router-dom';
 import { namesOfAllah as allNamesOfAllah } from '../data/names-of-allah';
@@ -44,6 +44,8 @@ export default function PrayerNotification() {
       const { name, voice, dua } = e.detail;
       stopSpeaking();
       clearTimers();
+      if (quranAudioRef.current) { quranAudioRef.current.pause(); quranAudioRef.current.onended = null; quranAudioRef.current.onerror = null; quranAudioRef.current = null; }
+      stopAzan();
 
       if (name === 'المغرب') {
         if (isRamadan()) {
@@ -149,8 +151,9 @@ export default function PrayerNotification() {
     const handleQuranBeforePrayer = (e) => {
       stopSpeaking();
       clearTimers();
+      if (quranAudioRef.current) { quranAudioRef.current.pause(); quranAudioRef.current.onended = null; quranAudioRef.current.onerror = null; quranAudioRef.current = null; }
       const { key, name, duration, surah, mode } = e.detail;
-      const randomSurahs = [36, 32, 55, 56, 67, 18, 19, 44, 38, 43];
+      const randomSurahs = [2, 36, 32, 55, 56, 67, 18, 19, 44, 38, 43];
       const surahNames = { 1:'الفاتحة',2:'البقرة',3:'آل عمران',4:'النساء',5:'المائدة',6:'الأنعام',7:'الأعراف',8:'الأنفال',9:'التوبة',10:'يونس',11:'هود',12:'يوسف',13:'الرعد',14:'إبراهيم',15:'الحجر',16:'النحل',17:'الإسراء',18:'الكهف',19:'مريم',20:'طه',21:'الأنبياء',22:'الحج',23:'المؤمنون',24:'النور',25:'الفرقان',26:'الشعراء',27:'النمل',28:'القصص',29:'العنكبوت',30:'الروم',31:'لقمان',32:'السجدة',33:'الأحزاب',34:'سبأ',35:'فاطر',36:'يس',37:'الصافات',38:'ص',39:'الزمر',40:'غافر',41:'فصلت',42:'الشورى',43:'الزخرف',44:'الدخان',45:'الجاثية',46:'الأحقاف',47:'محمد',48:'الفتح',49:'الحجرات',50:'ق',51:'الذاريات',52:'الطور',53:'النجم',54:'القمر',55:'الرحمن',56:'الواقعة',57:'الحديد',58:'المجادلة',59:'الحشر',60:'الممتحنة',61:'الصف',62:'الجمعة',63:'المنافقون',64:'التغابن',65:'الطلاق',66:'التحريم',67:'الملك',68:'القلم',69:'الحاقة',70:'المعارج',71:'نوح',72:'الجن',73:'المزمل',74:'المدثر',75:'القيامة',76:'الإنسان',77:'المرسلات',78:'النبأ',79:'النازعات',80:'عبس',81:'التكوير',82:'الانفطار',83:'المطففين',84:'الانشقاق',85:'البروج',86:'الطارق',87:'الأعلى',88:'الغاشية',89:'الفجر',90:'البلد',91:'الشمس',92:'الليل',93:'الضحى',94:'الشرح',95:'التين',96:'العلق',97:'القدر',98:'البينة',99:'الزلزلة',100:'العاديات',101:'القارعة',102:'التكاثر',103:'العصر',104:'الهمزة',105:'الفيل',106:'قريش',107:'الماعون',108:'الكوثر',109:'الكافرون',110:'النصر',111:'المسد',112:'الإخلاص',113:'الفلق',114:'الناس' };
 
       const playSurah = (sid, onFinished) => {
@@ -195,9 +198,37 @@ export default function PrayerNotification() {
       };
 
       if (mode === 'surah' && surah) {
-        playSurah(surah, startAdhanAfterQuran);
+        const now2 = new Date();
+        const nowSec2 = now2.getHours() * 3600 + now2.getMinutes() * 60 + now2.getSeconds();
+        let prayerSec2 = nowSec2 + (duration || 15) * 60;
+        try {
+          const pt2 = getPrayerTimesSync();
+          const raw2 = pt2[key] || '';
+          const cleaned2 = raw2.replace(/\s*\(.*?\)\s*/g, '').trim();
+          const match2 = cleaned2.match(/(\d{1,2}):(\d{2})/);
+          if (match2) prayerSec2 = parseInt(match2[1], 10) * 3600 + parseInt(match2[2], 10) * 60;
+        } catch {}
+        const stopSec = prayerSec2 - 60;
+        const endTs = Date.now() + Math.max(stopSec - nowSec2, 10) * 1000;
+        playSurah(surah, () => {
+          if (Date.now() >= endTs) {
+            if (quranAudioRef.current) { quranAudioRef.current.pause(); quranAudioRef.current = null; }
+            setNotif(null);
+          }
+        });
       } else {
-        const endTime = Date.now() + (duration || 15) * 60 * 1000;
+        const now = new Date();
+        const nowSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+        let prayerSec = nowSec + (duration || 15) * 60;
+        try {
+          const pt = getPrayerTimesSync();
+          const raw = pt[key] || '';
+          const cleaned = raw.replace(/\s*\(.*?\)\s*/g, '').trim();
+          const match = cleaned.match(/(\d{1,2}):(\d{2})/);
+          if (match) prayerSec = parseInt(match[1], 10) * 3600 + parseInt(match[2], 10) * 60;
+        } catch {}
+        const secsUntilPrayer = Math.max(prayerSec - nowSec - 60, 10);
+        const endTime = Date.now() + secsUntilPrayer * 1000;
         const playRandom = (sid) => {
           const url = getSurahAudioUrl('refaat', sid);
           const audio = new Audio(url);
@@ -210,7 +241,7 @@ export default function PrayerNotification() {
               const nextSurah = randomSurahs[Math.floor(Math.random() * randomSurahs.length)];
               setTimeout(() => playRandom(nextSurah), 300);
             } else {
-              startAdhanAfterQuran();
+              setNotif(null);
             }
           };
           audio.onerror = () => {
@@ -219,7 +250,7 @@ export default function PrayerNotification() {
               const nextSurah2 = randomSurahs[Math.floor(Math.random() * randomSurahs.length)];
               setTimeout(() => playRandom(nextSurah2), 1000);
             } else {
-              startAdhanAfterQuran();
+              setNotif(null);
             }
           };
           audio.play().catch(() => {});
@@ -267,7 +298,7 @@ export default function PrayerNotification() {
       const { surah, duration } = e.detail;
       let surahId = surah;
       if (surah === 'random') {
-        const randomSurahs = [36, 32, 55, 56, 67, 18, 19, 44, 38, 43];
+        const randomSurahs = [2, 36, 32, 55, 56, 67, 18, 19, 44, 38, 43];
         surahId = randomSurahs[Math.floor(Math.random() * randomSurahs.length)];
       } else if (surah === 'kahf') { surahId = 18; }
         else if (surah === 'yasin') { surahId = 36; }
@@ -402,11 +433,18 @@ export default function PrayerNotification() {
     stopRamadanCannon();
     clearTimers();
     if (namesTimerRef.current) clearTimeout(namesTimerRef.current);
+    if (quranAudioRef.current) { quranAudioRef.current.pause(); quranAudioRef.current.onended = null; quranAudioRef.current.onerror = null; quranAudioRef.current = null; }
     window.__namesPlaybackActive = false;
     setNotif(null);
     setNamesIdx(0);
     setIsSpeaking(false);
   };
+
+  useEffect(() => {
+    const onStopAll = () => handleClose();
+    window.electronAPI?.onStopAllAudio?.(onStopAll);
+    return () => { window.removeEventListener?.('stop-all-audio', onStopAll); };
+  }, []);
 
   const handleNamesPause = () => {
     if (isSpeaking) {

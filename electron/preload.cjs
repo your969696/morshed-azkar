@@ -54,6 +54,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   showMainWindow: () => ipcRenderer.invoke('show-main-window'),
   appIsQuitting: () => ipcRenderer.invoke('app-is-quitting'),
   onRestoreWindow: (cb) => ipcRenderer.on('restore-window', () => cb()),
+  onStopAllAudio: (cb) => ipcRenderer.on('stop-all-audio', () => cb()),
 
   // Auto-start on Windows login
   getAutoStart: () => ipcRenderer.invoke('get-auto-start'),

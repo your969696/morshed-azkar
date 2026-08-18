@@ -663,7 +663,7 @@ export default function Settings() {
                           };
 
                           if (quranOn) {
-                            const surahId = qm === 'surah' ? qSurah : [36,55,67,56,18][Math.floor(Math.random()*5)];
+                            const surahId = qm === 'surah' ? qSurah : [2,36,55,67,56,18][Math.floor(Math.random()*6)];
                             const url = getSurahAudioUrl('refaat', surahId);
                             const audio = new Audio(url);
                             audio.volume = 1;

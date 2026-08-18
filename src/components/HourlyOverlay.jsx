@@ -153,6 +153,7 @@ export default function HourlyOverlay() {
   showRandomRef.current = pickRandom;
 
   useEffect(() => {
+    return;
     const enabled = localStorage.getItem('hourlyOverlayEnabled') !== 'false' && localStorage.getItem('hourlyOverlayEnabled') !== null ? localStorage.getItem('hourlyOverlayEnabled') !== 'false' : true;
     if (localStorage.getItem('hourlyOverlayEnabled') === null) {
       localStorage.setItem('hourlyOverlayEnabled', 'true');
@@ -165,7 +166,10 @@ export default function HourlyOverlay() {
     if (window.electronAPI?.isElectron) {
       window.electronAPI.setReminderInterval('hourly', ms, true);
       const handler = () => {
-        const types = ['dhikr', 'hadith', 'history', 'deed', 'behavior'];
+        const allTypes = ['dhikr', 'hadith', 'history', 'deed', 'behavior'];
+        const today = new Date().toDateString();
+        const types = allTypes.filter(t => localStorage.getItem('hourlyOverlay_disabledType_' + t) !== today);
+        if (types.length === 0) return;
         const randomType = types[Math.floor(Math.random() * types.length)];
         showRandomRef.current(randomType);
       };
@@ -184,9 +188,13 @@ export default function HourlyOverlay() {
 
     nextShowRef.current = Date.now() + ms;
     const timer = setInterval(() => {
-      const types = ['dhikr', 'hadith', 'history', 'deed', 'behavior'];
-      const randomType = types[Math.floor(Math.random() * types.length)];
-      showRandomRef.current(randomType);
+      const allTypes = ['dhikr', 'hadith', 'history', 'deed', 'behavior'];
+      const today = new Date().toDateString();
+      const types = allTypes.filter(t => localStorage.getItem('hourlyOverlay_disabledType_' + t) !== today);
+      if (types.length > 0) {
+        const randomType = types[Math.floor(Math.random() * types.length)];
+        showRandomRef.current(randomType);
+      }
       nextShowRef.current = Date.now() + ms;
     }, ms);
     const testHandler = () => showRandomRef.current('dhikr');
@@ -366,6 +374,11 @@ export default function HourlyOverlay() {
                   <button className={`ov-btn ov-btn-speak${speaking ? ' speaking' : ''}`} onClick={toggleSpeak}>
                     {speaking ? '⏹️' : '🔊'} {speaking ? t.home.speakingBtn : t.home.listenBtn}
                   </button>
+                  <button className="ov-btn ov-btn-close" style={{ background: 'rgba(239,68,68,.15)', borderColor: 'rgba(239,68,68,.3)', color: '#ef4444' }} onClick={() => {
+                    const today = new Date().toDateString();
+                    localStorage.setItem('hourlyOverlay_disabledType_' + type, today);
+                    handleClose();
+                  }}>🚫 لا تظهر اليوم</button>
                   <button className="ov-btn ov-btn-close" onClick={handleClose}>✕ {t.common.close}</button>
                 </div>
 

@@ -56,9 +56,14 @@ function createWindow() {
   mainWindow.on('close', (e) => {
     if (!app.isQuitting) {
       e.preventDefault();
-      hideWidget();
-      hideAzkarWidget();
-      mainWindow.hide();
+      if (mainWindow.webContents) {
+        mainWindow.webContents.send('stop-all-audio');
+      }
+      setTimeout(() => {
+        hideWidget();
+        hideAzkarWidget();
+        mainWindow.hide();
+      }, 300);
     }
   });
   mainWindow.on('minimize', () => {
@@ -427,6 +432,7 @@ function showSystemNotification(title, body) {
 }
 
 function startHourlyReminders(intervalMs) {
+  return;
   if (hourlyTimer) clearInterval(hourlyTimer);
   hourlyTimer = setInterval(() => {
     const type = REMINDER_TYPES[Math.floor(Math.random() * REMINDER_TYPES.length)];

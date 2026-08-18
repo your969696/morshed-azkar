@@ -541,6 +541,48 @@ function HijriDate() {
   );
 }
 
+function NextEventBanner() {
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const iv = setInterval(() => setNow(Date.now()), 60000);
+    return () => clearInterval(iv);
+  }, []);
+
+  const nextEvent = useMemo(() => {
+    try {
+      const today = new Date();
+      const formatter = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {
+        day: 'numeric', month: 'numeric', numberingSystem: 'latn'
+      });
+      const parts = formatter.formatToParts(today);
+      const hijriMonth = parseInt(parts.find(p => p.type === 'month')?.value || '1');
+      const hijriDay = parseInt(parts.find(p => p.type === 'day')?.value || '1');
+      const all = getUpcomingIslamicDays(hijriMonth, hijriDay);
+      return all.find(e => e.daysUntil > 0) || all[0] || null;
+    } catch { return null; }
+  }, [now]);
+
+  if (!nextEvent || nextEvent.daysUntil === 0) return null;
+
+  const daysText = nextEvent.daysUntil === 1 ? '، باقي يوم واحد' : `، باقي ${nextEvent.daysUntil} يوم`;
+
+  return (
+    <>
+      <style>{`@keyframes glowPulse { 0% { color: #FFD700; text-shadow: 0 0 10px rgba(255,215,0,.8), 0 0 20px rgba(255,215,0,.5), 0 0 40px rgba(255,215,0,.3); } 50% { color: #FFFFFF; text-shadow: 0 0 10px rgba(255,255,255,.8), 0 0 20px rgba(255,255,255,.5), 0 0 40px rgba(255,255,255,.3); } 100% { color: #FFD700; text-shadow: 0 0 10px rgba(255,215,0,.8), 0 0 20px rgba(255,215,0,.5), 0 0 40px rgba(255,215,0,.3); } }`}</style>
+      <div style={{ margin: '6px 0 2px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+        <span style={{ fontSize: 22 }}>{nextEvent.icon}</span>
+        <span style={{
+          fontSize: 17, fontWeight: 700, color: '#FFD700',
+          textShadow: '0 0 10px rgba(255,215,0,.7), 0 0 20px rgba(255,215,0,.4), 0 0 30px rgba(255,215,0,.2)',
+          animation: 'glowPulse 2s ease-in-out infinite',
+        }}>
+          {nextEvent.nameAr}{daysText}
+        </span>
+      </div>
+    </>
+  );
+}
+
 function PrayerWidget() {
   const { t } = useTranslation();
   const [data, setData] = useState({});
@@ -1716,6 +1758,7 @@ export default function Home() {
               </Link>
             </div>
           </div>
+          <NextEventBanner />
           <PrayerWidget />
           <QuranPlayer />
           <HeroHadithBar />
