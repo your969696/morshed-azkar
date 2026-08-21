@@ -2,8 +2,6 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { LanguageProvider } from './i18n.jsx';
 import Navbar from './components/Navbar';
-import HadithNotification from './components/HadithNotification';
-import DhikrNotification from './components/DhikrNotification';
 import HourlyOverlay from './components/HourlyOverlay';
 import PrayerCountdown from './components/PrayerCountdown';
 import PrayerNotification from './components/PrayerNotification';
@@ -58,6 +56,7 @@ const NewMuslimGuide = lazy(() => import('./pages/NewMuslimGuide'));
 const HalalFinder = lazy(() => import('./pages/HalalFinder'));
 const HalalProductChecker = lazy(() => import('./pages/HalalProductChecker'));
 const KindredReminders = lazy(() => import('./pages/KindredReminders'));
+const MyLibrary = lazy(() => import('./pages/MyLibrary'));
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -212,6 +211,7 @@ export default function App() {
               <Route path="/halal" element={<HalalFinder />} />
               <Route path="/halal-products" element={<HalalProductChecker />} />
               <Route path="/kindred" element={<KindredReminders />} />
+              <Route path="/my-library" element={<MyLibrary />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
@@ -219,12 +219,6 @@ export default function App() {
           </div>
           <ErrorBoundary>
           <Navbar />
-          </ErrorBoundary>
-          <ErrorBoundary>
-          <DhikrNotification />
-          </ErrorBoundary>
-          <ErrorBoundary>
-          <HadithNotification />
           </ErrorBoundary>
           <ErrorBoundary>
           <HourlyOverlay />

@@ -2,7 +2,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
   getDataStats: () => ipcRenderer.invoke('get-data-stats'),
-  generateTTS: (text, voice) => ipcRenderer.invoke('tts-generate', text, voice),
+  generateTTS: (text, voice, rate) => ipcRenderer.invoke('tts-generate', text, voice, rate),
   takeFullScreenshot: () => ipcRenderer.invoke('take-full-screenshot'),
   isElectron: true,
 
@@ -59,6 +59,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Auto-start on Windows login
   getAutoStart: () => ipcRenderer.invoke('get-auto-start'),
   setAutoStart: (enabled) => ipcRenderer.invoke('set-auto-start', enabled),
+
+  // Fetch URL from main process (no CORS)
+  fetchUrl: (url) => ipcRenderer.invoke('fetch-url', url),
 
   // Error logging
   writeErrorLog: (msg) => ipcRenderer.invoke('write-error-log', msg),

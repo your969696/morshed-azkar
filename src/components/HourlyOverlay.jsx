@@ -166,7 +166,7 @@ export default function HourlyOverlay() {
     if (window.electronAPI?.isElectron) {
       window.electronAPI.setReminderInterval('hourly', ms, true);
       const handler = () => {
-        const allTypes = ['dhikr', 'hadith', 'history', 'deed', 'behavior'];
+        const allTypes = ['dhikr', 'history', 'deed', 'behavior'];
         const today = new Date().toDateString();
         const types = allTypes.filter(t => localStorage.getItem('hourlyOverlay_disabledType_' + t) !== today);
         if (types.length === 0) return;

@@ -20,6 +20,8 @@
     "framer-motion": "^12.42.0",
     "howler": "^2.2.4",
     "lucide-react": "^1.22.0",
+    "mammoth": "^1.12.1",
+    "pdf-parse": "^2.4.5",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.18.1"
@@ -63,4 +65,3 @@
     }
   }
 }
-

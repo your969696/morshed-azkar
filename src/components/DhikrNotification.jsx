@@ -191,25 +191,7 @@ export default function DhikrNotification() {
 
   useEffect(() => {
     if (visible && current) {
-      if (localStorage.getItem('dhikrAutoSpeak') === null) {
-        localStorage.setItem('dhikrAutoSpeak', 'true');
-      }
-      const autoSpeak = localStorage.getItem('dhikrAutoSpeak') !== 'false';
-      if (autoSpeak && current.text) {
-        const maxRepeat = current.count > 10 ? 3 : Math.min(current.count || 1, 3);
-        let repeatN = 0;
-        const speakOnce = () => {
-          setSpeaking(true);
-          speakArabic(current.text, () => {
-            setSpeaking(false);
-            repeatN++;
-            if (repeatN < maxRepeat) {
-              speakRepeatRef.current = setTimeout(speakOnce, 1500);
-            }
-          });
-        };
-        speakOnce();
-      }
+      // Auto-speak disabled to avoid conflict with adhan/quran audio
     }
     return () => { if (speakRepeatRef.current) clearTimeout(speakRepeatRef.current); };
   }, [visible, current]);

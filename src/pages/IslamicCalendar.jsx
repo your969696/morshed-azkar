@@ -11,16 +11,16 @@ const WEEKDAYS = ['سبت', 'أحد', 'إثنين', 'ثلاثاء', 'أربعا�
 
 function getHijriForDate(date) {
   try {
-    const formatter = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {
+    const formatter = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura', {
       day: 'numeric', month: 'numeric', year: 'numeric'
     });
     const parts = formatter.formatToParts(date);
     const day = parseInt(parts.find(p => p.type === 'day')?.value || '1');
     const month = parseInt(parts.find(p => p.type === 'month')?.value || '1');
-    const year = parseInt(parts.find(p => p.type === 'year')?.value || '1446');
+    const year = parseInt(parts.find(p => p.type === 'year')?.value || '1448');
     return { day, month, year };
   } catch {
-    return { day: 1, month: 1, year: 1446 };
+    return { day: 1, month: 1, year: 1448 };
   }
 }
 

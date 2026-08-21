@@ -224,9 +224,6 @@ export default function PrayerCountdown() {
             } catch {
               window.dispatchEvent(new CustomEvent('prayerTimeArrived', { detail: { key, name: PRAYER_NAMES_AR[key] } }));
             }
-            if (window.electronAPI?.showMainWindow) {
-              window.electronAPI.showMainWindow();
-            }
           }
         }
       }

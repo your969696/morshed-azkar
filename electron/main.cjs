@@ -3,10 +3,6 @@ const path = require('path');
 const fs = require('fs');
 const { execFile } = require('child_process');
 
-app.commandLine.appendSwitch('disable-renderer-backgrounding');
-app.commandLine.appendSwitch('disable-background-timer-throttling');
-app.commandLine.appendSwitch('disable-backgrounding-occluded-windows');
-
 const isDev = false;
 const DIST = path.join(__dirname, '..', 'dist');
 
@@ -278,11 +274,21 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true, supportFetchAPI: true, stream: true } },
 ]);
 
-app.commandLine.appendSwitch('disable-features', 'AudioServiceOutOfProcess');
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
-app.commandLine.appendSwitch('disable-renderer-backgrounding');
 
-app.whenReady().then(() => {
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.show();
+      mainWindow.focus();
+    }
+  });
+
+  app.whenReady().then(() => {
   protocol.handle('app', (request) => {
     const filePath = path.join(DIST, decodeURIComponent(request.url.slice('app://localhost/'.length)));
     const ext = path.extname(filePath).toLowerCase();
@@ -377,13 +383,6 @@ function checkFridayKahf() {
 
 setInterval(checkFridayKahf, 30000);
 
-// ===== Keep renderer alive when minimized =====
-setInterval(() => {
-  if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents) {
-    mainWindow.webContents.send('keepAlive');
-  }
-}, 10000);
-
 app.on('window-all-closed', () => {
   // Don't quit — keep running in system tray
 });
@@ -454,6 +453,7 @@ function startHourlyReminders(intervalMs) {
 }
 
 function startHadithReminders(intervalMs) {
+  return;
   if (hadithTimer) clearInterval(hadithTimer);
   hadithTimer = setInterval(() => {
     if (mainWindow && !mainWindow.isDestroyed() && !mainWindow.isMinimized()) {
@@ -594,9 +594,12 @@ function findPython() {
   return null;
 }
 
-ipcMain.handle('tts-generate', async (_event, text) => {
+ipcMain.handle('tts-generate', async (_event, text, voice, rate) => {
   if (!text || !text.trim()) return null;
-  const cached = getTtsCachePath(text);
+  const voiceName = voice || 'ar-SA-HamedNeural';
+  const rateValue = rate || '-20%';
+  const cacheKey = `${voiceName}:${rateValue}:${text}`;
+  const cached = getTtsCachePath(cacheKey);
   if (fs.existsSync(cached)) return cached;
 
   const python = findPython();
@@ -606,12 +609,30 @@ ipcMain.handle('tts-generate', async (_event, text) => {
   if (!fs.existsSync(ttsScript)) return null;
 
   return new Promise((resolve) => {
-    execFile(python, [ttsScript, text, cached], { timeout: 30000 }, (err) => {
+    execFile(python, [ttsScript, text, cached, voiceName, rateValue], { timeout: 60000 }, (err) => {
       if (err) { resolve(null); return; }
       if (fs.existsSync(cached)) resolve(cached);
       else resolve(null);
     });
   });
+});
+
+// ===== FETCH URL (main process, no CORS restrictions) =====
+ipcMain.handle('fetch-url', async (_event, url) => {
+  try {
+    const resp = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'ar,en;q=0.9',
+      },
+    });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const html = await resp.text();
+    return { ok: true, html };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
 });
 
 // ===== ERROR LOG =====
@@ -770,3 +791,4 @@ app.whenReady().then(() => {
 app.on('will-quit', () => {
   globalShortcut.unregisterAll();
 });
+}

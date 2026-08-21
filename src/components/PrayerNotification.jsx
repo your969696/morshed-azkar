@@ -213,7 +213,7 @@ export default function PrayerNotification() {
         playSurah(surah, () => {
           if (Date.now() >= endTs) {
             if (quranAudioRef.current) { quranAudioRef.current.pause(); quranAudioRef.current = null; }
-            setNotif(null);
+            startAdhanAfterQuran();
           }
         });
       } else {
@@ -230,6 +230,7 @@ export default function PrayerNotification() {
         const secsUntilPrayer = Math.max(prayerSec - nowSec - 60, 10);
         const endTime = Date.now() + secsUntilPrayer * 1000;
         const playRandom = (sid) => {
+          if (quranAudioRef.current) { quranAudioRef.current.pause(); quranAudioRef.current.onended = null; quranAudioRef.current.onerror = null; quranAudioRef.current.src = ''; quranAudioRef.current = null; }
           const url = getSurahAudioUrl('refaat', sid);
           const audio = new Audio(url);
           audio.volume = 1;
@@ -241,7 +242,7 @@ export default function PrayerNotification() {
               const nextSurah = randomSurahs[Math.floor(Math.random() * randomSurahs.length)];
               setTimeout(() => playRandom(nextSurah), 300);
             } else {
-              setNotif(null);
+              startAdhanAfterQuran();
             }
           };
           audio.onerror = () => {
@@ -250,7 +251,7 @@ export default function PrayerNotification() {
               const nextSurah2 = randomSurahs[Math.floor(Math.random() * randomSurahs.length)];
               setTimeout(() => playRandom(nextSurah2), 1000);
             } else {
-              setNotif(null);
+              startAdhanAfterQuran();
             }
           };
           audio.play().catch(() => {});
@@ -261,7 +262,7 @@ export default function PrayerNotification() {
 
     const handleTakbeer = () => {
       stopSpeaking();
-      const isEidDay = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', { day: 'numeric', month: 'numeric' }).formatToParts(new Date()).find(p => p.type === 'month')?.value === '10';
+      const isEidDay = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura', { day: 'numeric', month: 'numeric' }).formatToParts(new Date()).find(p => p.type === 'month')?.value === '10';
       setNotif({ type: 'takbeer', icon: '🎉', title: isEidDay ? t.prayerNotif.eidMubarak : t.prayerNotif.takbeer, prayer: t.prayerNotif.takbeerText });
       playTakbeer();
       scheduleDismiss();

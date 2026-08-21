@@ -2,8 +2,8 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '../i18n.jsx';
-import { speakArabic, stopSpeaking, playTakbeer, stopTakbeer, isTakbeerPlaying } from '../utils/sound';
-import { getPrayerTimesSync, PRAYER_KEYS, PRAYER_KEYS_ONLY, PRAYER_NAMES_AR, formatTime12h, calcFastingInfo, isRamadan, isEid, getDaysUntilRamadan, parseTime, isInProhibitionTime, getCurrentProhibitionPeriod } from '../utils/prayer-times';
+import { playTakbeer, stopTakbeer, isTakbeerPlaying } from '../utils/sound';
+import { getPrayerTimesSync, PRAYER_KEYS, PRAYER_KEYS_ONLY, PRAYER_NAMES_AR, formatTime12h, calcFastingInfo, isRamadan, isEid, getDaysUntilRamadan, parseTime } from '../utils/prayer-times';
 import { quizQuestions } from '../data/quiz-questions';
 import { getUpcomingIslamicDays } from '../data/islamic-days';
 import AzkarSection from '../components/AzkarSection';
@@ -43,35 +43,6 @@ const QUICK_AZKAR = [
   { text: 'لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ', total: 10 },
 ];
 
-const HADITHS = [
-  { text: 'لا يؤمن أحدكم حتى يحب لأخيه ما يحب لنفسه', source: 'متفق عليه' },
-  { text: 'المسلم من سلم المسلمون من لسانه ويده', source: 'البخاري ومسلم' },
-  { text: 'أحب الأعمال إلى الله أداومها وإن قلّ', source: 'البخاري ومسلم' },
-  { text: 'من لم تنهه صلاته عن الفحشاء والمنكر فلا صلاة له', source: 'البخاري' },
-  { text: 'إذا مات الإنسان انقطع عنه عمله إلا من ثلاثة: من صدقة جارية، أو علم ينتفع به، أو ولد صالح يدعو له', source: 'مسلم' },
-  { text: 'اتق الله حيثما كنت، وأتبع السيئة الحسنة تمحها، وخالق الناس بخلق حسن', source: 'الترمذي' },
-  { text: 'إنما الأعمال بالنيات وإنما لكل امرئ ما نوى', source: 'البخاري ومسلم' },
-  { text: 'من كان يؤمن بالله واليوم الآخر فليقل خيراً أو ليصمت', source: 'البخاري ومسلم' },
-  { text: 'المؤمن للمؤمن كالبنيان يشدّ بعضه بعضاً', source: 'البخاري ومسلم' },
-  { text: 'خيركم من تعلم القرآن وعلمه', source: 'البخاري' },
-  { text: 'اطلبوا العلم ولو في الصين', source: 'ابن ماجه' },
-  { text: 'أكمل المؤمنين إيماناً أحسنهم خُلُقاً', source: 'أبو داود' },
-  { text: 'لا ضرر ولا ضرار', source: 'ابن ماجه' },
-  { text: 'الدين النصيحة. قلنا: لمن؟ قال: لله ولكتابه ولرسوله ولأئمة المسلمين وعامتهم', source: 'مسلم' },
-  { text: 'لا يشبع المؤمن من الخير حتى يكون ترابه', source: 'الترمذي' },
-];
-
-const PROHIBITION_HADITHS = [
-  { text: 'ثلاث لا تُرتفع ولا تُرفع: الصلاة على وقتها، وبر الوالدين، وصلة الرحم', source: 'أبو داود والترمذي', ref: 'سنن أبي داود 4866' },
-  { text: 'أفضل الصلاة المكتوبة صلاة في وقتها إلا صلاة الفجر إلا صلاة الفجر', source: 'البخاري ومسلم', ref: 'صحيح البخاري 527' },
-  { text: 'لا تُصلَّى صلاة بعد الفجر إلا صلاة مكتوبة، حتى تطلع الشمس، ثم ترتفع قليلاً، ثم تصلي ركعتين، ثم لا تكون لك صلاة حتى ترتفع الشمس', source: 'البخاري ومسلم', ref: 'صحيح البخاري 528' },
-  { text: 'لا تُصلَّى صلاة بعد العصر إلا صلاة مكتوبة، ثم لا تكون لك صلاة حتى تغرب الشمس', source: 'البخاري ومسلم', ref: 'صحيح البخاري 528' },
-  { text: 'إذا أقيمت الصلاة فلا صلاة إلا المكتوبة', source: 'البخاري ومسلم', ref: 'صحيح البخاري 657' },
-  { text: 'إذا نويتم الصلاة فأتموها، ثم أقيمت الصلاة فلا صلاة إلا المكتوبة', source: 'أبو داود والترمذي', ref: 'سنن أبي داود 1155' },
-  { text: 'أفضل الأعمال إلى الله أدومها وإن قلّ', source: 'البخاري ومسلم', ref: 'صحيح البخاري 6464' },
-  { text: 'الصلاة نور، والصدقة برهان، والصبر ضياء', source: 'الترمذي', ref: 'سنن الترمذي 2557' },
-];
-
 const HIJRI_MONTHS_AR = ['محرم', 'صفر', 'ربيع الأول', 'ربيع الآخر', 'جمادى الأولى', 'جمادى الآخرة', 'رجب', 'شعبان', 'رمضان', 'شوال', 'ذو القعدة', 'ذو الحجة'];
 const GREG_MONTHS_AR = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
 const DAYS_AR = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
@@ -94,11 +65,6 @@ function hijriToGregorian(hYear, hMonth, hDay) {
     return null;
   }
 }
-
-const WISDOMS = [
-  { text: 'العلم نور، والجهل ظلام، فالطالب النور حديثه كما كان', source: 'الإمام الشافعي' },
-  { text: 'من عرف نفسه فقد عرف ربه', source: 'حكمة عربية' },
-];
 
 const DAILY_QUESTIONS = [
   { q: 'لماذا يوجد الكون بدلًا من أن لا يوجد شيء؟', a: 'لأن الوجود يحتاج سببًا أوليًا، والعدم لا يخلق وجودًا.' },
@@ -289,19 +255,6 @@ const homeCss = `
 .t-item.on .t-time{color:#fff;font-weight:700;font-size:12px}
 .t-item.on::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:4px;height:4px;background:#00c896;border-radius:50%;box-shadow:0 0 8px rgba(0,200,150,.6)}
 
-.hero-hadith{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:10px 14px;margin-top:12px;position:relative;overflow:hidden;min-height:52px;display:flex;align-items:center;transition:all .5s ease}
-.hero-hadith.prohibition{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.2)}
-.hero-hadith-text{font-family:'Amiri Quran',serif;font-size:13px;color:rgba(255,255,255,.75);line-height:1.8;text-align:center;direction:rtl;width:100%}
-.hero-hadith.prohibition .hero-hadith-text{color:rgba(255,200,200,.85)}
-.hero-hadith-source{display:block;font-family:'Segoe UI',Tahoma,sans-serif;font-size:10px;color:#f0b040;font-weight:700;margin-top:4px;text-align:center}
-.hero-hadith.prohibition .hero-hadith-source{color:#ef4444}
-.hero-hadith-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:8px;font-size:9px;font-weight:700;margin-bottom:6px;background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.2)}
-.hero-countdown{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;font-size:10px;color:rgba(255,255,255,.35);font-weight:600}
-.hero-countdown-num{font-size:22px;font-weight:700;color:#00c896;font-variant-numeric:tabular-nums;line-height:1}
-.hero-hadith.prohibition .hero-countdown-num{color:#ef4444}
-.hero-countdown-label{font-size:10px;color:rgba(255,255,255,.3);font-weight:500}
-.hero-hadith.prohibition .hero-countdown-label{color:rgba(239,68,68,.4)}
-
 .wc{width:100%;padding:0 16px;box-sizing:border-box}
 .wc-card{border-radius:20px;overflow:hidden;position:relative;background:linear-gradient(145deg,#1a3a5c,#0d2137);box-shadow:0 8px 32px rgba(0,0,0,.35);transition:background .6s}
 .wc-bg{position:absolute;inset:0;pointer-events:none;overflow:hidden}
@@ -420,22 +373,7 @@ canvas.wc-canvas{border-radius:6px}
 .radio-play{width:40px;height:40px;background:#8b5cf6;border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;flex-shrink:0;border:none;color:#fff}
 .radio-play:hover{background:#7c3aed;transform:scale(1.05)}
 
-.daily{background:#151030;border:1px solid rgba(255,255,255,.05);border-radius:18px;padding:18px}
-.daily-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
 .daily-title{font-size:15px;font-weight:700;color:#fff}
-.tabs{display:flex;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:3px;gap:2px}
-.tab{padding:5px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;color:rgba(255,255,255,.3);border:none;background:transparent;font-family:inherit;transition:all .2s}
-.tab.on-h{background:#8b5cf6;color:#fff}
-.tab.on-w{background:#f0b040;color:#1a1a1a}
-.quote-box{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05);border-radius:12px;padding:14px 14px 14px 10px;margin-bottom:12px;position:relative}
-.quote-mark{position:absolute;top:4px;right:12px;font-size:42px;color:rgba(139,92,246,.15);font-family:Georgia,serif;line-height:1;pointer-events:none}
-.quote-text{font-size:14px;color:rgba(255,255,255,.85);line-height:1.75;padding-right:6px}
-.quote-src{font-size:11px;color:#f0b040;font-weight:700;margin-top:8px}
-.btns{display:flex;gap:8px}
-.btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;border:none;transition:all .2s}
-.btn-listen{background:rgba(139,92,246,.12);color:#a78bfa;border:1px solid rgba(139,92,246,.18)}
-.btn-listen.on{background:rgba(0,200,150,.15);color:#00c896;border-color:rgba(0,200,150,.25);box-shadow:0 0 16px rgba(0,200,150,.15)}
-.btn-det{background:rgba(255,255,255,.05);color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.07)}
 
 .azkar-list{display:flex;flex-direction:column;gap:8px}
 .az-item{background:#151030;border:1px solid rgba(255,255,255,.05);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s}
@@ -651,7 +589,11 @@ function PrayerWidget() {
 
       const fasting = calcFastingInfo(times.Sunrise, times.Maghrib);
 
-      setData({ np: PRAYER_NAMES_AR[np], npTime: formatTime12h(times[np]), cd, prog, pct, srDone, srCd, srTime: formatTime12h(times.Sunrise), ssDone, ssCd, ssTime: formatTime12h(times.Maghrib), prayerRow, fasting });
+      const fromTime = formatTime12h(times[prKeys[pi]]);
+      const prevPrayerName = PRAYER_NAMES_AR[prKeys[pi]];
+      const remaining = cd.str;
+
+      setData({ np: PRAYER_NAMES_AR[np], npTime: formatTime12h(times[np]), cd, prog, pct, fromTime, prevPrayerName, remaining, srDone, srCd, srTime: formatTime12h(times.Sunrise), ssDone, ssCd, ssTime: formatTime12h(times.Maghrib), prayerRow, fasting });
     };
     update();
     const iv = setInterval(update, 1000);
@@ -683,7 +625,6 @@ function PrayerWidget() {
                 <div style={{ fontSize: '0.6rem', fontWeight: 600, color: '#8a82a0', marginTop: 4, letterSpacing: 1 }}>ساعة : دقيقة : ثانية</div>
               </div>
             </div>
-            <div style={{ position: 'absolute', bottom: 6, left: '50%', transform: 'translateX(-50%)', fontSize: '0.7rem', fontWeight: 800, color: '#00c896', background: 'rgba(0,200,150,.12)', padding: '3px 10px', borderRadius: 8, border: '1px solid rgba(0,200,150,.15)', textShadow: '0 1px 3px rgba(0,0,0,.3)' }}>{data.pct}% مضى</div>
           </div>
           {/* Info */}
           <div style={{ flex: 1, position: 'relative', zIndex: 1 }}>
@@ -704,86 +645,31 @@ function PrayerWidget() {
         </div>
       </div>
 
+      {/* Progress Bar */}
+      <div style={{ height: 52, borderRadius: 0, overflow: 'hidden', background: 'rgba(255,255,255,.04)', border: '0.5px solid rgba(255,255,255,.08)', position: 'relative' }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: `${data.pct}%`, background: 'linear-gradient(90deg,#0369a1,#0ea5e9)', borderRadius: 0, transition: 'width .6s ease' }} />
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1.5, background: 'linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent)' }} />
+        <div style={{ position: 'absolute', top: 0, bottom: 0, left: `calc(${data.pct}% - 1px)`, width: 2, background: 'rgba(255,255,255,.4)', borderRadius: 1, transition: 'left .6s ease', boxShadow: '0 0 6px rgba(255,255,255,.3)' }} />
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'rgba(255,255,255,.9)', boxShadow: '0 0 0 2px rgba(255,255,255,.25)', flexShrink: 0 }} />
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,.95)' }}>{data.np}</div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,.5)', marginTop: 1 }}>{data.fromTime} ← {data.npTime}</div>
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(255,255,255,.9)', fontVariantNumeric: 'tabular-nums' }}>{data.pct}%</div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,.5)', textAlign: 'center' }}>متبقي {data.remaining}</div>
+          </div>
+        </div>
+      </div>
+
       {/* Prayer Times Bar */}
       <PrayerTimesBar />
 
       {/* Fasting Bar */}
       <FastingBar />
-    </div>
-  );
-}
-
-function HeroHadithBar() {
-  const { t } = useTranslation();
-  const [idx, setIdx] = useState(0);
-  const [countdown, setCountdown] = useState('');
-  const [nextPrayerName, setNextPrayerName] = useState('');
-  const [isProhibition, setIsProhibition] = useState(false);
-  const [periodLabel, setPeriodLabel] = useState('');
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIdx(prev => {
-        const inProhib = isInProhibitionTime();
-        const pool = inProhib ? PROHIBITION_HADITHS : HADITHS;
-        return (prev + 1) % pool.length;
-      });
-    }, 8000);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const update = () => {
-      const inProhib = isInProhibitionTime();
-      setIsProhibition(inProhib);
-      const period = getCurrentProhibitionPeriod();
-      setPeriodLabel(period ? period.label : '');
-      const times = getPrayerTimesSync();
-      const now = new Date();
-      const nowSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-      for (let i = 0; i < PRAYER_KEYS_ONLY.length; i++) {
-        const parts = (times[PRAYER_KEYS_ONLY[i]] || '').split(':').map(Number);
-        const pSec = ((parts[0] || 0) * 60 + (parts[1] || 0)) * 60;
-        if (pSec > nowSec) {
-          const diffSec = pSec - nowSec;
-          const h = Math.floor(diffSec / 3600);
-          const m = Math.floor((diffSec % 3600) / 60);
-          const s = diffSec % 60;
-          setCountdown(h > 0 ? `${h} س ${m} د ${s} ث` : m > 0 ? `${m} د ${s} ث` : `${s} ث`);
-          setNextPrayerName(PRAYER_NAMES_AR[PRAYER_KEYS_ONLY[i]]);
-          return;
-        }
-      }
-      const firstParts = (times[PRAYER_KEYS_ONLY[0]] || '').split(':').map(Number);
-      const firstSec = ((firstParts[0] || 0) * 60 + (firstParts[1] || 0)) * 60;
-      const diffSec = (24 * 3600 - nowSec) + firstSec;
-      const h = Math.floor(diffSec / 3600);
-      const m = Math.floor((diffSec % 3600) / 60);
-      const s = diffSec % 60;
-      setCountdown(h > 0 ? `${h} س ${m} د ${s} ث` : m > 0 ? `${m} د ${s} ث` : `${s} ث`);
-      setNextPrayerName(PRAYER_NAMES_AR[PRAYER_KEYS_ONLY[0]]);
-    };
-    update();
-    const iv = setInterval(update, 1000);
-    return () => clearInterval(iv);
-  }, []);
-
-  const pool = isProhibition ? PROHIBITION_HADITHS : HADITHS;
-  const hadith = pool[idx % pool.length];
-
-  return (
-    <div className={`hero-hadith${isProhibition ? ' prohibition' : ''}`} key={`${isProhibition ? 'p' : 'n'}-${idx}`}>
-      <div>
-        {isProhibition && <div className="hero-hadith-badge">⛔ {t.heroHadith.prohibitionPrefix}{periodLabel}</div>}
-        <div className="hero-hadith-text">
-          {hadith.text}
-          <span className="hero-hadith-source">— {hadith.source}</span>
-        </div>
-        <div className="hero-countdown">
-          <span className="hero-countdown-label">{isProhibition ? t.heroHadith.endsAt : t.heroHadith.countdownTo} {nextPrayerName}</span>
-          <span className="hero-countdown-num">{countdown}</span>
-        </div>
-      </div>
     </div>
   );
 }
@@ -1394,53 +1280,6 @@ function RadioStrip() {
   );
 }
 
-function DailyCard() {
-  const { t } = useTranslation();
-  const [tab, setTab] = useState('hadith');
-  const [speaking, setSpeaking] = useState(false);
-  const dayIdx = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-  const hadith = HADITHS[dayIdx % HADITHS.length];
-  const wisdom = WISDOMS[dayIdx % WISDOMS.length];
-  const item = tab === 'hadith' ? hadith : wisdom;
-
-  const handleSpeak = () => {
-    if (speaking) { stopSpeaking(); setSpeaking(false); return; }
-    setSpeaking(true);
-    speakArabic(item.text + '. ' + item.source, () => setSpeaking(false));
-  };
-
-  return (
-    <div className="daily">
-      <div className="daily-head">
-        <div className="daily-title">{t.dailyCard?.hadithTitle || 'حديث اليوم'}</div>
-        <div className="tabs">
-          <button className={`tab${tab === 'hadith' ? ' on-h' : ''}`} onClick={() => setTab('hadith')}>{t.home.hadithTab}</button>
-          <button className={`tab${tab === 'wisdom' ? ' on-w' : ''}`} onClick={() => setTab('wisdom')}>{t.home.wisdomTab}</button>
-        </div>
-      </div>
-      <AnimatePresence mode="wait">
-        <motion.div key={tab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.25 }}>
-          <div className="quote-box">
-            <div className="quote-mark">{'\u201C'}</div>
-            <div className="quote-text">{item.text}</div>
-            <div className="quote-src">{item.source}</div>
-          </div>
-          <div className="btns">
-            <button className={`btn btn-listen${speaking ? ' on' : ''}`} onClick={handleSpeak}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19" />{speaking && <><path d="M19.07 4.93a10 10 0 0 1 0 14.14" stroke="currentColor" strokeWidth="2" fill="none" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" stroke="currentColor" strokeWidth="2" fill="none" /></>}</svg>
-              {speaking ? t.home.speakingBtn : t.home.listenBtn}
-            </button>
-            <Link to="/daily" className="btn btn-det">
-              {t.home.detailsBtn}
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15 18 9 12 15 6" /></svg>
-            </Link>
-          </div>
-        </motion.div>
-      </AnimatePresence>
-    </div>
-  );
-}
-
 function DailyQuiz() {
   const { t } = useTranslation();
   const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
@@ -1761,7 +1600,6 @@ export default function Home() {
           <NextEventBanner />
           <PrayerWidget />
           <QuranPlayer />
-          <HeroHadithBar />
         </div>
 
         <WeatherStrip />
@@ -1812,9 +1650,6 @@ export default function Home() {
           </div>
 
           <RadioStrip />
-
-          <div className="sec-label">{t.homeSections?.dailyKnowledge || 'كل يوم معلومة'}</div>
-          <DailyCard />
 
           <div className="sec-label">{t.homeSections?.quizYourself || 'اختبر نفسك'}</div>
           <DailyQuiz />
